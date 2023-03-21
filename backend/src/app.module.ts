@@ -9,7 +9,7 @@ import { MessageModule } from './message/message.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({isGlobal: true}),
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot(dataSourceOptions),
     ChatroomModule,
     MessageModule,

@@ -5,8 +5,18 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class MessageService {
-    constructor(
-        @InjectRepository(MessageEntity)
-        private readonly messageRepository: Repository<MessageEntity>,
-    ) {}
+  constructor(
+    @InjectRepository(MessageEntity)
+    private readonly messageRepository: Repository<MessageEntity>,
+  ) {}
+
+  getAllMessagesForChatroom(id: string): Promise<MessageEntity[]> {
+    console.log(id);
+
+    return this.messageRepository.find({
+      where: {
+        chatroom_id: id,
+      },
+    });
+  }
 }
