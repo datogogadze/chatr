@@ -5,4 +5,10 @@ module.exports = defineConfig({
   configureWebpack: {
     entry: './src/main.js',
   },
+  chainWebpack: (config) => {
+    config.plugin('html').tap((args) => {
+      args[0].title = 'Speakr';
+      return args;
+    });
+  },
 });
