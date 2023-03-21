@@ -1,13 +1,13 @@
-const { defineConfig } = require('@vue/cli-service');
+const { defineConfig } = require("@vue/cli-service");
 module.exports = defineConfig({
   transpileDependencies: true,
-  publicPath: './',
+  publicPath: "./",
   configureWebpack: {
-    entry: './src/main.js',
+    entry: "./src/main.js",
   },
   chainWebpack: (config) => {
-    config.plugin('html').tap((args) => {
-      args[0].title = 'Speakr';
+    config.plugin("html").tap((args) => {
+      args[0].title = "Speakr";
       return args;
     });
   },

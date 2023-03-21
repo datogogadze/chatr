@@ -1,19 +1,19 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('chatrooms')
-export class ChatroomEntity {
+@Entity('users')
+export class UserEntity {
   @PrimaryGeneratedColumn()
   public id: string;
 
   @Column()
-  public name: string;
+  public email: string;
 
   @Column()
-  public creator_id: number;
-
-  @Column()
-  public description: string;
+  public password: string;
 
   @Column()
   public created_at: Date;
+
+  @Column()
+  public updated_at: Date;
 }

@@ -4,12 +4,10 @@ import { ChatroomService } from './chatroom.service';
 
 @Controller('chatroom')
 export class ChatroomController {
+  constructor(private chatroomService: ChatroomService) {}
 
-    constructor(private chatroomService: ChatroomService) {}
-
-    @Get()
-    getAllChatrooms(): Promise<ChatroomEntity[]> {
-      return this.chatroomService.getAllChatrooms();
-    }
-
+  @Get()
+  getAllChatrooms(): Promise<ChatroomEntity[]> {
+    return this.chatroomService.getAllChatrooms();
+  }
 }

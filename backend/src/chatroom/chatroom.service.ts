@@ -5,14 +5,12 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class ChatroomService {
+  constructor(
+    @InjectRepository(ChatroomEntity)
+    private readonly chatroomRepository: Repository<ChatroomEntity>,
+  ) {}
 
-    constructor(
-        @InjectRepository(ChatroomEntity)
-        private readonly chatroomRepository: Repository<ChatroomEntity>,
-    ) {}
-
-    getAllChatrooms(): Promise<ChatroomEntity[]> {
-        return this.chatroomRepository.find();
-    }
-
+  getAllChatrooms(): Promise<ChatroomEntity[]> {
+    return this.chatroomRepository.find();
+  }
 }
