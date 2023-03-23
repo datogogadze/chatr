@@ -6,6 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from './typeorm.config';
 import { ChatroomModule } from './chatroom/chatroom.module';
 import { MessageModule } from './message/message.module';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +15,8 @@ import { MessageModule } from './message/message.module';
     TypeOrmModule.forRoot(dataSourceOptions),
     ChatroomModule,
     MessageModule,
+    UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
