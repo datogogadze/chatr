@@ -7,9 +7,9 @@ export class messagesTable1679415103414 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE messages (
               id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4() PRIMARY KEY,
-              text VARCHAR (256),
-              sender_id UUID,
-              chatroom_id UUID,
+              text VARCHAR (256) NOT NULL,
+              sender_id UUID NOT NULL,
+              chatroom_id UUID NOT NULL,
               created_at TIMESTAMP DEFAULT NOW(),
               updated_at TIMESTAMP DEFAULT NOW(),
               CONSTRAINT fk_message_chatroom
