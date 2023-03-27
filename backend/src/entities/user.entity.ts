@@ -12,6 +12,9 @@ export class UserEntity {
   public password: string;
 
   @Column()
+  public refresh_token: string;
+
+  @Column()
   public created_at: Date;
 
   @Column()
