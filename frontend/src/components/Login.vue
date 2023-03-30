@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="row justify-content-center">
+    <div class="row justify-content-center mt-5">
       <div class="col-md-6">
         <div class="card">
           <div class="card-header">
@@ -11,7 +11,7 @@
               <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
                 <input
-                  type="text"
+                  type="email"
                   class="form-control"
                   id="email"
                   v-model="email"
@@ -33,6 +33,9 @@
               >
                 Login
               </button>
+              <router-link to="/registration" class="btn btn-secondary ms-2"
+                >Register</router-link
+              >
             </form>
           </div>
         </div>
@@ -43,6 +46,7 @@
 
 <script>
 import { ref } from 'vue';
+import { loginUser } from '@/api/api';
 
 export default {
   name: 'LoginPage',
@@ -50,7 +54,18 @@ export default {
     const email = ref('');
     const password = ref('');
 
-    function login() {}
+    function login() {
+      if (email.value && password.value) {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email.value)) {
+          alert('Invalid email format');
+        } else {
+          loginUser(email.value, password.value);
+        }
+      } else {
+        alert('Enter email and password');
+      }
+    }
 
     return {
       email,

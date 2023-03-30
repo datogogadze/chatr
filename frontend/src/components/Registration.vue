@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="row justify-content-center">
+    <div class="row justify-content-center mt-5">
       <div class="col-md-6">
         <div class="card">
           <div class="card-header">
@@ -11,12 +11,13 @@
               <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
                 <input
-                  type="text"
+                  type="email"
                   class="form-control"
                   id="email"
                   v-model="email"
                 />
               </div>
+
               <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <input
@@ -29,10 +30,13 @@
               <button
                 type="submit"
                 class="btn btn-primary"
-                @click.prevent="register()"
+                @click.prevent="register(email, password)"
               >
                 Register
               </button>
+              <router-link to="/login" class="btn btn-secondary ms-2"
+                >Login</router-link
+              >
             </form>
           </div>
         </div>
@@ -43,6 +47,7 @@
 
 <script>
 import { ref } from 'vue';
+import { registerUser } from '@/api/api';
 
 export default {
   name: 'RegisterPage',
@@ -50,7 +55,18 @@ export default {
     const email = ref('');
     const password = ref('');
 
-    function register() {}
+    function register() {
+      if (email.value && password.value) {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email.value)) {
+          alert('Invalid email format');
+        } else {
+          registerUser(email.value, password.value);
+        }
+      } else {
+        alert('Enter email and password');
+      }
+    }
 
     return {
       email,

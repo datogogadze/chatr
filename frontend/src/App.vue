@@ -1,17 +1,14 @@
 <template>
-  <!-- <ChatRoomList /> -->
-  <Register />
+  <router-view />
 </template>
 
 <script>
-// import ChatRoomList from './components/ChatRoomList.vue';
-import Register from './components/Register.vue';
+// import MainPage from './components/MainPage.vue';
 
 export default {
   name: 'App',
   components: {
-    // ChatRoomList,
-    Register,
+    // MainPage,
   },
 };
 </script>

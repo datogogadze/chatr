@@ -1,11 +1,17 @@
 <template>
   <div class="container">
-    <div class="row">
-      <div class="col-md-8 offset-md-2">
+    <div class="row mt-5">
+      <div class="col-md-8 offset-md-0">
         <div class="card">
-          <div class="card-header bg-primary text-white">#{{ room.name }}</div>
+          <div class="card-header bg-primary text-white">
+            #{{
+              chatroomStore.selectedRoom
+                ? chatroomStore.selectedRoom.name
+                : '#room'
+            }}
+          </div>
           <div class="card-body messages-container" ref="chatBox">
-            <div v-for="message in messages" :key="message.id">
+            <div v-for="message in messageStore.messages" :key="message.id">
               <p>
                 <strong>{{ message.user }}:</strong> {{ message.text }}
               </p>
@@ -38,69 +44,47 @@
 }
 </style>
 
-<script>
-import { ref, onMounted, watch } from 'vue';
-import { getAllMessagesForChatroom } from '../api/api';
+<script setup>
+import { useChatRoomStore } from '@/stores/chatroom';
+import { useMessageStore } from '@/stores/message';
+import { ref, watch } from 'vue';
 
-export default {
-  name: 'ChatRoom',
-  props: {
-    room: {
-      required: true,
-    },
-  },
-  setup(props) {
-    const messages = ref([]);
-    const newMessage = ref('');
+const chatroomStore = useChatRoomStore();
+const messageStore = useMessageStore();
 
-    const sendMessage = () => {
-      if (!newMessage.value) return;
+const newMessage = ref('');
 
-      const message = {
-        id: Date.now(),
-        user: 'You',
-        text: newMessage.value,
-      };
+const sendMessage = () => {
+  if (!newMessage.value) return;
 
-      messages.value.push(message);
-      newMessage.value = '';
+  const message = {
+    id: Date.now(),
+    user: 'You',
+    text: newMessage.value,
+  };
 
-      scrollToBottom();
-    };
+  messageStore.pushMessage(message);
+  newMessage.value = '';
 
-    const chatBox = ref(null);
-    const scrollToBottom = () => {
-      if (!chatBox.value) return;
-      chatBox.value.scrollTop = chatBox.value.scrollHeight;
-    };
-
-    onMounted(async () => {
-      try {
-        messages.value = await getAllMessagesForChatroom(props.room.id);
-        scrollToBottom();
-      } catch (error) {
-        console.log({ error });
-      }
-    });
-
-    watch(
-      () => props.room.id,
-      async (newVal) => {
-        try {
-          messages.value = await getAllMessagesForChatroom(newVal);
-          scrollToBottom();
-        } catch (error) {
-          console.log({ error });
-        }
-      }
-    );
-
-    return {
-      messages,
-      newMessage,
-      sendMessage,
-      chatBox,
-    };
-  },
+  scrollToBottom();
 };
+
+const chatBox = ref(null);
+const scrollToBottom = () => {
+  if (!chatBox.value) return;
+  chatBox.value.scrollTop = chatBox.value.scrollHeight;
+};
+
+watch(
+  () => chatroomStore.selectedRoom,
+  async (newVal) => {
+    try {
+      await messageStore.fetchMessages(newVal.id);
+      scrollToBottom();
+    } catch (error) {
+      console.log({ error });
+    }
+  }
+);
 </script>
+<style></style>
