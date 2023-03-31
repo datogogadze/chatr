@@ -1,26 +1,26 @@
-import Login from './components/Login.vue';
-import Registration from './components/Registration.vue';
+import LoginForm from './components/LoginForm.vue';
+import RegistrationForm from './components/RegistrationForm.vue';
 import MainPage from './components/MainPage.vue';
 import * as VueRouter from 'vue-router';
 
 const routes = [
   {
     path: '/',
-    redirect: '/home',
+    redirect: '/login',
   },
   {
     path: '/login',
     name: 'Login',
-    component: Login,
+    component: LoginForm,
   },
   {
     path: '/registration',
     name: 'Registration',
-    component: Registration,
+    component: RegistrationForm,
   },
   {
     path: '/home',
-    name: 'Home',
+    name: 'MainPage',
     component: MainPage,
   },
 ];
@@ -28,17 +28,6 @@ const routes = [
 const router = VueRouter.createRouter({
   history: VueRouter.createWebHistory(),
   routes,
-});
-
-const checkIfUserIsLoggedIn = () => true;
-
-router.beforeEach((to, from, next) => {
-  const isLoggedIn = checkIfUserIsLoggedIn();
-  if (to.name !== 'login' && to.name !== 'register' && !isLoggedIn) {
-    next({ name: 'login' });
-  } else {
-    next();
-  }
 });
 
 export default router;

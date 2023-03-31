@@ -11,8 +11,6 @@ export class MessageService {
   ) {}
 
   getAllMessagesForChatroom(id: string): Promise<MessageEntity[]> {
-    console.log(id);
-
     return this.messageRepository.find({
       where: {
         chatroom_id: id,

@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthDto } from 'src/dto/auth.dto';
-import { TokenDto } from 'src/dto/token.dto';
+import { AccessToken, RefreshToken, TokenDto } from 'src/dto/token.dto';
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from 'src/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -19,11 +19,21 @@ export class AuthService {
   async register(user: AuthDto): Promise<TokenDto> {
     const hash: string = await this.getHash(user.password);
     const newUser = await this.userRepository.save({ ...user, password: hash });
-    const tokens: TokenDto = await this.getTokens(newUser.id, newUser.email);
+    const accessToken: AccessToken = await this.getAccessToken(
+      newUser.id,
+      newUser.email,
+    );
 
-    await this.updateRefreshToken(newUser.id, tokens.refresh_token);
+    const refreshToken: RefreshToken = await this.updateRefreshToken(
+      newUser.id,
+      newUser.email,
+    );
 
-    return tokens;
+    return {
+      access_token: accessToken.access_token,
+      refresh_token: refreshToken.refresh_token,
+      user_id: newUser.id,
+    };
   }
 
   async login(user: AuthDto): Promise<TokenDto> {
@@ -31,7 +41,7 @@ export class AuthService {
       where: { email: user.email },
     });
     if (!existingUser) {
-      throw new Error(`User not found ${user.email}`);
+      throw new UnauthorizedException(`User not found ${user.email}`);
     }
 
     const passwordMatches = await bcrypt.compare(
@@ -40,17 +50,24 @@ export class AuthService {
     );
 
     if (!passwordMatches) {
-      throw new Error(`Incorrect password for ${user.email}`);
+      throw new UnauthorizedException(`Incorrect password for ${user.email}`);
     }
 
-    const tokens: TokenDto = await this.getTokens(
+    const accessToken: AccessToken = await this.getAccessToken(
       existingUser.id,
       existingUser.email,
     );
 
-    await this.updateRefreshToken(existingUser.id, tokens.refresh_token);
+    const refreshToken: RefreshToken = await this.updateRefreshToken(
+      existingUser.id,
+      existingUser.email,
+    );
 
-    return tokens;
+    return {
+      access_token: accessToken.access_token,
+      refresh_token: refreshToken.refresh_token,
+      user_id: existingUser.id,
+    };
   }
 
   async logout(userId: string): Promise<ResponseDto> {
@@ -59,7 +76,7 @@ export class AuthService {
     });
 
     if (!existingUser) {
-      throw new Error(`Can't log out ${userId}`);
+      throw new UnauthorizedException(`Can't log out ${userId}`);
     }
 
     await this.userRepository.save({
@@ -71,13 +88,16 @@ export class AuthService {
     return { success: true };
   }
 
-  async refreshToken(userId: string, refreshToken: string): Promise<TokenDto> {
+  async refreshAccessToken(
+    userId: string,
+    refreshToken: string,
+  ): Promise<AccessToken> {
     const existingUser = await this.userRepository.findOne({
       where: { id: userId, refresh_token: Not(IsNull()) },
     });
 
     if (!existingUser) {
-      throw new Error(`Can't log out ${userId}`);
+      throw new UnauthorizedException(`Can't refresh token for ${userId}`);
     }
 
     const refreshTokenMatches = await bcrypt.compare(
@@ -86,44 +106,30 @@ export class AuthService {
     );
 
     if (!refreshTokenMatches) {
-      throw new Error(`Refresh tokens don't match ${userId}`);
+      throw new UnauthorizedException(`Refresh tokens don't match ${userId}`);
     }
 
-    const tokens: TokenDto = await this.getTokens(
+    const accessToken: AccessToken = await this.getAccessToken(
       existingUser.id,
       existingUser.email,
     );
 
-    await this.updateRefreshToken(existingUser.id, tokens.refresh_token);
-
-    return tokens;
+    return accessToken;
   }
 
-  async getTokens(userId: string, email: string) {
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(
-        {
-          sub: userId,
-          email,
-        },
-        {
-          expiresIn: 60 * 15,
-          secret: process.env.JWT_ACCESS_TOKEN_SECRET,
-        },
-      ),
-      this.jwtService.signAsync(
-        {
-          sub: userId,
-          email,
-        },
-        {
-          expiresIn: 60 * 60 * 24 * 7,
-          secret: process.env.JWT_REFRESH_TOKEN_SECRET,
-        },
-      ),
-    ]);
+  async getAccessToken(userId: string, email: string): Promise<AccessToken> {
+    const accessToken = await this.jwtService.signAsync(
+      {
+        sub: userId,
+        email,
+      },
+      {
+        expiresIn: 60 * 15,
+        secret: process.env.JWT_ACCESS_TOKEN_SECRET,
+      },
+    );
 
-    return { access_token: accessToken, refresh_token: refreshToken };
+    return { access_token: accessToken };
   }
 
   async getHash(str: string) {
@@ -132,14 +138,25 @@ export class AuthService {
     return hash;
   }
 
-  async updateRefreshToken(id: string, refreshToken: string) {
+  async updateRefreshToken(id: string, email: string): Promise<RefreshToken> {
     const user: UserEntity = await this.userRepository.findOne({
       where: { id },
     });
 
     if (!user) {
-      throw new Error(`Can't update refresh token for ${id}`);
+      throw new UnauthorizedException(`Can't update refresh token for ${id}`);
     }
+
+    const refreshToken = await this.jwtService.signAsync(
+      {
+        sub: id,
+        email,
+      },
+      {
+        expiresIn: 60 * 60 * 24 * 7,
+        secret: process.env.JWT_REFRESH_TOKEN_SECRET,
+      },
+    );
 
     const hash = await this.getHash(refreshToken);
 
@@ -148,5 +165,7 @@ export class AuthService {
       ...user,
       refresh_token: hash,
     });
+
+    return { refresh_token: refreshToken };
   }
 }

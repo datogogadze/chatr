@@ -82,7 +82,7 @@ watch(
       await messageStore.fetchMessages(newVal.id);
       scrollToBottom();
     } catch (error) {
-      console.log({ error });
+      console.log('Error in chatroom watch', { error });
     }
   }
 );

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -9,6 +9,7 @@ import { MessageModule } from './message/message.module';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './guards/at.guard';
+import * as cookieParser from 'cookie-parser';
 
 @Module({
   imports: [
@@ -21,4 +22,8 @@ import { AtGuard } from './guards/at.guard';
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AtGuard }],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(cookieParser()).forRoutes('*');
+  }
+}
