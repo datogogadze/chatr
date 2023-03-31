@@ -18,7 +18,6 @@ export const useChatRoomStore = defineStore('chatroom', {
   actions: {
     async fetchChatrooms() {
       const rooms = await getAllChatrooms();
-      console.log({ rooms });
       this.chatrooms = rooms;
       this.selectedRoom = rooms.length > 0 ? rooms[0] : null;
     },

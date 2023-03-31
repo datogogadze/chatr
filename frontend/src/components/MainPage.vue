@@ -6,20 +6,36 @@
     <div class="chatroom">
       <ChatRoom />
     </div>
+    <div class="logout-button">
+      <button class="btn btn-danger mt-5" @click="logout">Logout</button>
+    </div>
   </div>
 </template>
 
-<script>
+<script setup>
 import ChatRoomList from './ChatRoomList.vue';
 import ChatRoom from './ChatRoom.vue';
+import { onMounted } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import router from '@/router';
 
-export default {
-  name: 'App',
-  components: {
-    ChatRoomList,
-    ChatRoom,
-  },
-};
+const authStore = useAuthStore();
+
+async function logout() {
+  await authStore.logout();
+  router.push('/login');
+}
+
+onMounted(async () => {
+  try {
+    if (!(await authStore.refreshAccessToken())) {
+      router.push('/login');
+      return;
+    }
+  } catch (error) {
+    console.log('Error in main page onBeforeMount', { error });
+  }
+});
 </script>
 
 <style>
@@ -37,6 +53,10 @@ export default {
 
 .chatroom {
   width: 60%;
+}
+
+.logout-button {
+  width: 120px;
 }
 
 html,

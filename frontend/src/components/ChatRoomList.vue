@@ -32,7 +32,7 @@ onMounted(async () => {
   try {
     await store.fetchChatrooms();
   } catch (error) {
-    console.log({ error });
+    console.log('Error in chatroom list onMounted', { error });
   }
 });
 </script>

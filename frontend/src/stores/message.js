@@ -15,7 +15,6 @@ export const useMessageStore = defineStore('message', {
   actions: {
     async fetchMessages(chatroomId) {
       const messages = await getAllMessagesForChatroom(chatroomId);
-      console.log({ messages });
       this.messages = messages;
     },
 

@@ -4,7 +4,7 @@
       <div class="col-md-6">
         <div class="card">
           <div class="card-header">
-            <h4>Login</h4>
+            <h4>Register</h4>
           </div>
           <div class="card-body">
             <form>
@@ -17,6 +17,7 @@
                   v-model="email"
                 />
               </div>
+
               <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <input
@@ -29,12 +30,12 @@
               <button
                 type="submit"
                 class="btn btn-primary"
-                @click.prevent="login()"
+                @click.prevent="register(email, password)"
               >
-                Login
+                Register
               </button>
-              <router-link to="/registration" class="btn btn-secondary ms-2"
-                >Register</router-link
+              <router-link to="/login" class="btn btn-secondary ms-2"
+                >Login</router-link
               >
             </form>
           </div>
@@ -44,34 +45,39 @@
   </div>
 </template>
 
-<script>
-import { ref } from 'vue';
-import { loginUser } from '@/api/api';
+<script setup>
+import { ref, onBeforeMount } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import router from '@/router';
 
-export default {
-  name: 'LoginPage',
-  setup() {
-    const email = ref('');
-    const password = ref('');
+const authStore = useAuthStore();
 
-    function login() {
-      if (email.value && password.value) {
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(email.value)) {
-          alert('Invalid email format');
-        } else {
-          loginUser(email.value, password.value);
-        }
+const email = ref('');
+const password = ref('');
+
+async function register() {
+  if (email.value && password.value) {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email.value)) {
+      alert('Invalid email format');
+    } else {
+      if (await authStore.register(email.value, password.value)) {
+        router.push('/home');
       } else {
-        alert('Enter email and password');
+        alert("Couldn't register");
       }
     }
+  } else {
+    alert('Enter email and password');
+  }
+}
 
-    return {
-      email,
-      password,
-      login,
-    };
-  },
-};
+const LOGGED_IN = 'logged-in';
+
+onBeforeMount(async () => {
+  if (localStorage.getItem(LOGGED_IN) === 'true') {
+    router.push('/home');
+    return;
+  }
+});
 </script>
