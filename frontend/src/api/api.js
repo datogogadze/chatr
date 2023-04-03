@@ -20,10 +20,12 @@ api.interceptors.response.use(
             return api(error.config);
           }
         } else {
+          await api.post('/auth/clear-cookies');
           if (
             router.currentRoute.value.name !== 'Registration' &&
             router.currentRoute.value.name !== 'Login'
           ) {
+            localStorage.setItem(LOGGED_IN, 'false');
             router.push('/login');
           }
         }

@@ -1,5 +1,5 @@
 <template>
-  <div class="main-page">
+  <div class="main-page" v-if="authenticated">
     <div class="chatroom-list">
       <ChatRoomList />
     </div>
@@ -15,7 +15,7 @@
 <script setup>
 import ChatRoomList from './ChatRoomList.vue';
 import ChatRoom from './ChatRoom.vue';
-import { onMounted } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import router from '@/router';
 
@@ -26,12 +26,11 @@ async function logout() {
   router.push('/login');
 }
 
-onMounted(async () => {
+const authenticated = ref(false);
+
+onBeforeMount(async () => {
   try {
-    if (!(await authStore.refreshAccessToken())) {
-      router.push('/login');
-      return;
-    }
+    authenticated.value = await authStore.refreshAccessToken();
   } catch (error) {
     console.log('Error in main page onBeforeMount', { error });
   }

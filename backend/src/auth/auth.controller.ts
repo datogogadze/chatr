@@ -5,10 +5,11 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { getCurrentUserId } from 'src/decorators/get-user-id.decorator';
 import { getCurrentUser } from 'src/decorators/get-user.decorator';
 import { Public } from 'src/decorators/public.decorator';
@@ -68,13 +69,23 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(
-    @Res() res: Response,
-    @getCurrentUserId() userId: string,
-  ): Promise<void> {
+  async logout(@Req() req: Request, @Res() res: Response): Promise<void> {
     res.cookie('access_token', '', { expires: new Date(0) });
     res.cookie('refresh_token', '', { expires: new Date(0) });
-    await this.authService.logout(userId);
+
+    if (req.user && req.user['sub']) {
+      await this.authService.logout(req.user['sub']);
+    }
+
+    res.send({ success: true });
+  }
+
+  @Public()
+  @Post('clear-cookies')
+  @HttpCode(HttpStatus.OK)
+  async clearCookies(@Res() res: Response): Promise<void> {
+    res.cookie('access_token', '', { expires: new Date(0) });
+    res.cookie('refresh_token', '', { expires: new Date(0) });
     res.send({ success: true });
   }
 
