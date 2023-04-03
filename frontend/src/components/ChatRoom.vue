@@ -2,12 +2,12 @@
   <div class="container">
     <div class="row mt-5">
       <div class="col-md-8 offset-md-0">
-        <div class="card">
+        <div class="card" v-if="chatroomStore.selectedRoom">
           <div class="card-header bg-primary text-white">
             #{{
               chatroomStore.selectedRoom
                 ? chatroomStore.selectedRoom.name
-                : '#room'
+                : 'room'
             }}
           </div>
           <div class="card-body messages-container" ref="chatBox">
@@ -31,6 +31,9 @@
               </div>
             </form>
           </div>
+        </div>
+        <div class="card" style="height: 200px; text-align: center" v-else>
+          <h3 class="mt-3">No avaliable chatrooms</h3>
         </div>
       </div>
     </div>

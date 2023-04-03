@@ -21,11 +21,13 @@ export class AuthService {
     const newUser = await this.userRepository.save({ ...user, password: hash });
     const accessToken: AccessToken = await this.getAccessToken(
       newUser.id,
+      newUser.username,
       newUser.email,
     );
 
     const refreshToken: RefreshToken = await this.updateRefreshToken(
       newUser.id,
+      newUser.username,
       newUser.email,
     );
 
@@ -55,11 +57,13 @@ export class AuthService {
 
     const accessToken: AccessToken = await this.getAccessToken(
       existingUser.id,
+      existingUser.username,
       existingUser.email,
     );
 
     const refreshToken: RefreshToken = await this.updateRefreshToken(
       existingUser.id,
+      existingUser.username,
       existingUser.email,
     );
 
@@ -111,17 +115,23 @@ export class AuthService {
 
     const accessToken: AccessToken = await this.getAccessToken(
       existingUser.id,
+      existingUser.username,
       existingUser.email,
     );
 
     return accessToken;
   }
 
-  async getAccessToken(userId: string, email: string): Promise<AccessToken> {
+  async getAccessToken(
+    userId: string,
+    username: string,
+    email: string,
+  ): Promise<AccessToken> {
     const accessToken = await this.jwtService.signAsync(
       {
         sub: userId,
         email,
+        username,
       },
       {
         expiresIn: process.env.JWT_ACCESS_TOKEN_TTL,
@@ -138,7 +148,11 @@ export class AuthService {
     return hash;
   }
 
-  async updateRefreshToken(id: string, email: string): Promise<RefreshToken> {
+  async updateRefreshToken(
+    id: string,
+    username: string,
+    email: string,
+  ): Promise<RefreshToken> {
     const user: UserEntity = await this.userRepository.findOne({
       where: { id },
     });
@@ -150,6 +164,7 @@ export class AuthService {
     const refreshToken = await this.jwtService.signAsync(
       {
         sub: id,
+        username,
         email,
       },
       {

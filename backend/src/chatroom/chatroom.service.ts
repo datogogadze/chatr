@@ -10,7 +10,7 @@ export class ChatroomService {
     private readonly chatroomRepository: Repository<ChatroomEntity>,
   ) {}
 
-  getAllChatrooms(): Promise<ChatroomEntity[]> {
+  getAllChatrooms(userId: string): Promise<ChatroomEntity[]> {
     return this.chatroomRepository.find();
   }
 }

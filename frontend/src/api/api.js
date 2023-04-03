@@ -41,9 +41,9 @@ api.interceptors.response.use(
   }
 );
 
-export async function registerUser(email, password) {
+export async function registerUser(username, email, password) {
   try {
-    await api.post('/auth/register', { email, password });
+    await api.post('/auth/register', { username, email, password });
     return true;
   } catch (error) {
     console.log('Error in registerUser', { error: error.response.data });

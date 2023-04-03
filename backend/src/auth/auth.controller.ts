@@ -51,33 +51,48 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Res() res: Response, @Body() user: AuthDto): Promise<void> {
-    const authData: TokenDto = await this.authService.register(user);
-    this.setCookies(res, authData.access_token, authData.refresh_token);
-    res.send({ success: true });
+    try {
+      const authData: TokenDto = await this.authService.register(user);
+      this.setCookies(res, authData.access_token, authData.refresh_token);
+      res.send({ success: true });
+    } catch (error) {
+      console.log('Error in refreshToken endpoint', error);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ success: false });
+    }
   }
 
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Res() res: Response, @Body() user: AuthDto): Promise<void> {
-    const authData: TokenDto = await this.authService.login(user);
+    try {
+      const authData: TokenDto = await this.authService.login(user);
 
-    this.setCookies(res, authData.access_token, authData.refresh_token);
+      this.setCookies(res, authData.access_token, authData.refresh_token);
 
-    res.send({ success: true });
+      res.send({ success: true });
+    } catch (error) {
+      console.log('Error in refreshToken endpoint', error);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ success: false });
+    }
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   async logout(@Req() req: Request, @Res() res: Response): Promise<void> {
-    res.cookie('access_token', '', { expires: new Date(0) });
-    res.cookie('refresh_token', '', { expires: new Date(0) });
+    try {
+      res.cookie('access_token', '', { expires: new Date(0) });
+      res.cookie('refresh_token', '', { expires: new Date(0) });
 
-    if (req.user && req.user['sub']) {
-      await this.authService.logout(req.user['sub']);
+      if (req.user && req.user['sub']) {
+        await this.authService.logout(req.user['sub']);
+      }
+
+      res.send({ success: true });
+    } catch (error) {
+      console.log('Error in refreshToken endpoint', error);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ success: false });
     }
-
-    res.send({ success: true });
   }
 
   @Public()
@@ -98,11 +113,14 @@ export class AuthController {
     @getCurrentUserId() userId: string,
     @getCurrentUser('refreshToken') refreshToken: string,
   ): Promise<void> {
-    const accessToken: AccessToken = await this.authService.refreshAccessToken(
-      userId,
-      refreshToken,
-    );
-    this.setCookies(res, accessToken.access_token, null);
-    res.send({ success: true });
+    try {
+      const accessToken: AccessToken =
+        await this.authService.refreshAccessToken(userId, refreshToken);
+      this.setCookies(res, accessToken.access_token, null);
+      res.send({ success: true });
+    } catch (error) {
+      console.log('Error in refreshToken endpoint', error);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ success: false });
+    }
   }
 }
