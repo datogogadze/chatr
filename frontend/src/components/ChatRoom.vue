@@ -4,7 +4,8 @@
       <div class="col-md-8 offset-md-0">
         <div class="card" v-if="chatroomStore.selectedRoom">
           <div class="card-header bg-primary text-white">
-            #{{
+            #
+            {{
               chatroomStore.selectedRoom
                 ? chatroomStore.selectedRoom.name
                 : 'room'
@@ -48,8 +49,8 @@
 </style>
 
 <script setup>
-import { useChatRoomStore } from '@/stores/chatroom';
-import { useMessageStore } from '@/stores/message';
+import { useChatRoomStore } from '@/stores/chatroom.store';
+import { useMessageStore } from '@/stores/message.store';
 import { ref, watch } from 'vue';
 
 const chatroomStore = useChatRoomStore();

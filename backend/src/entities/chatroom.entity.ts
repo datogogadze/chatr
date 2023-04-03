@@ -9,7 +9,7 @@ export class ChatroomEntity {
   public name: string;
 
   @Column()
-  public creator_id: number;
+  public creator_id: string;
 
   @Column()
   public description: string;
