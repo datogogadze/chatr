@@ -116,4 +116,28 @@ export async function getAllMessagesForChatroom(id) {
   }
 }
 
+export async function createChatroom(name) {
+  try {
+    const response = await api.post(`/chatroom`, { name });
+    return response.data;
+  } catch (error) {
+    console.log('Error in createChatroom', {
+      error: error.response.data,
+    });
+    return null;
+  }
+}
+
+export async function deleteRoom(id) {
+  try {
+    const response = await api.delete(`/chatroom/${id}`);
+    return response.data;
+  } catch (error) {
+    console.log('Error in deleteRoom', {
+      error: error.response.data,
+    });
+    return null;
+  }
+}
+
 export default api;

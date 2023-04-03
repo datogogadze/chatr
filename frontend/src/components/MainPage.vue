@@ -16,7 +16,7 @@
 import ChatRoomList from './ChatRoomList.vue';
 import ChatRoom from './ChatRoom.vue';
 import { onBeforeMount, ref } from 'vue';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore } from '@/stores/auth.store';
 import router from '@/router';
 
 const authStore = useAuthStore();
