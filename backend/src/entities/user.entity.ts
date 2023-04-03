@@ -6,6 +6,9 @@ export class UserEntity {
   public id: string;
 
   @Column()
+  public username: string;
+
+  @Column()
   public email: string;
 
   @Column()

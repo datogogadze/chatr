@@ -9,6 +9,16 @@
           <div class="card-body">
             <form>
               <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="username"
+                  v-model="username"
+                />
+              </div>
+
+              <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
                 <input
                   type="email"
@@ -52,16 +62,19 @@ import router from '@/router';
 
 const authStore = useAuthStore();
 
+const username = ref('');
 const email = ref('');
 const password = ref('');
 
 async function register() {
-  if (email.value && password.value) {
+  if (username.value && email.value && password.value) {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email.value)) {
       alert('Invalid email format');
     } else {
-      if (await authStore.register(email.value, password.value)) {
+      if (
+        await authStore.register(username.value, email.value, password.value)
+      ) {
         router.push('/home');
       } else {
         alert("Couldn't register");
