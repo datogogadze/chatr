@@ -16,6 +16,10 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  async getUser(userId: string): Promise<UserEntity> {
+    return await this.userRepository.findOne({ where: { id: userId } });
+  }
+
   async register(user: AuthDto): Promise<TokenDto> {
     const hash: string = await this.getHash(user.password);
     const newUser = await this.userRepository.save({ ...user, password: hash });

@@ -44,7 +44,8 @@ export class AuthController {
   @Get('me')
   @HttpCode(HttpStatus.OK)
   async me(@getCurrentUserId() userId: string): Promise<UserDto> {
-    return { id: userId };
+    const user = await this.authService.getUser(userId);
+    return { id: userId, username: user.username };
   }
 
   @Public()
@@ -56,7 +57,7 @@ export class AuthController {
       this.setCookies(res, authData.access_token, authData.refresh_token);
       res.send({ success: true });
     } catch (error) {
-      console.log('Error in refreshToken endpoint', error);
+      console.log('Error in register endpoint', error);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ success: false });
     }
   }
@@ -72,7 +73,7 @@ export class AuthController {
 
       res.send({ success: true });
     } catch (error) {
-      console.log('Error in refreshToken endpoint', error);
+      console.log('Error in login endpoint', error);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ success: false });
     }
   }
@@ -90,7 +91,7 @@ export class AuthController {
 
       res.send({ success: true });
     } catch (error) {
-      console.log('Error in refreshToken endpoint', error);
+      console.log('Error in logout endpoint', error);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ success: false });
     }
   }

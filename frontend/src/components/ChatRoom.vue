@@ -2,7 +2,7 @@
   <div class="container">
     <div class="row mt-5">
       <div class="col-md-8 offset-md-0">
-        <div class="card" v-if="chatroomStore.selectedRoom">
+        <div class="card" v-if="chatroomStore.selectedRoom && isSocketOpen">
           <div class="card-header bg-primary text-white">
             #
             {{
@@ -14,7 +14,14 @@
           <div class="card-body messages-container" ref="chatBox">
             <div v-for="message in messageStore.messages" :key="message.id">
               <p>
-                <strong>{{ message.user }}:</strong> {{ message.text }}
+                <strong
+                  >{{
+                    message.sender_name === authStore.me.username
+                      ? 'Me'
+                      : authStore.me.username
+                  }}:</strong
+                >
+                {{ message.text }}
               </p>
               <hr />
             </div>
@@ -34,7 +41,7 @@
           </div>
         </div>
         <div class="card" style="height: 200px; text-align: center" v-else>
-          <h3 class="mt-3">No avaliable chatrooms</h3>
+          <h3 class="mt-3">Chatroom not connected</h3>
         </div>
       </div>
     </div>
@@ -52,25 +59,31 @@
 import { useAuthStore } from '@/stores/auth.store';
 import { useChatRoomStore } from '@/stores/chatroom.store';
 import { useMessageStore } from '@/stores/message.store';
-import { ref, watch } from 'vue';
+import { ref, watch, onBeforeUnmount, onBeforeMount } from 'vue';
+import { io } from 'socket.io-client';
+
+const socket = io(process.env.VUE_APP_API_URL);
 
 const chatroomStore = useChatRoomStore();
 const messageStore = useMessageStore();
 const authStore = useAuthStore();
 
 const newMessage = ref('');
+const isSocketOpen = ref(false);
 
 const sendMessage = () => {
   if (!newMessage.value) return;
 
   const message = {
-    sender_id: authStore.userId,
+    sender_id: authStore.me.id,
+    sender_name: authStore.me.username,
     chatroom_id: chatroomStore.getSelectedRoomId,
     text: newMessage.value,
     created_at: Date.now(),
   };
 
-  messageStore.pushMessage(message);
+  // messageStore.pushMessage(message);
+  socket.emit('message', message);
   newMessage.value = '';
 
   scrollToBottom();
@@ -84,9 +97,15 @@ const scrollToBottom = () => {
 
 watch(
   () => chatroomStore.selectedRoom,
-  async (newVal) => {
+  async (newVal, oldVal) => {
     try {
       if (newVal) {
+        if (oldVal) {
+          socket.emit('leave', oldVal.id);
+        }
+
+        socket.emit('join', newVal.id);
+
         await messageStore.fetchMessages(newVal.id);
         scrollToBottom();
       }
@@ -95,5 +114,26 @@ watch(
     }
   }
 );
+
+onBeforeMount(() => {
+  socket.on('connect', () => {
+    isSocketOpen.value = true;
+  });
+
+  socket.on('message', (message) => {
+    messageStore.pushMessage(message);
+  });
+
+  socket.on('disconnect', () => {
+    isSocketOpen.value = false;
+  });
+});
+
+onBeforeUnmount(() => {
+  if (chatroomStore.getSelectedRoomId) {
+    socket.emit('leave', chatroomStore.getSelectedRoomId);
+  }
+  socket.close();
+});
 </script>
 <style></style>

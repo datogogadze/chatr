@@ -9,6 +9,7 @@ import { MessageModule } from './message/message.module';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './guards/at.guard';
+import { GatewayModule } from './gateway/gateway.module';
 import * as cookieParser from 'cookie-parser';
 
 @Module({
@@ -18,6 +19,7 @@ import * as cookieParser from 'cookie-parser';
     ChatroomModule,
     MessageModule,
     AuthModule,
+    GatewayModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: AtGuard }],
