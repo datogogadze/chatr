@@ -11,7 +11,7 @@ const LOGGED_IN = 'logged-in';
 
 export const useAuthStore = defineStore('auth', {
   state: () => {
-    return { userId: null };
+    return { me: null };
   },
 
   getters: {},
@@ -21,7 +21,7 @@ export const useAuthStore = defineStore('auth', {
       if (await registerUser(username, email, password));
       const me = await userMe();
       if (me) {
-        this.userId = me.id;
+        this.me = me;
         localStorage.setItem(LOGGED_IN, 'true');
         return true;
       } else {
@@ -34,7 +34,7 @@ export const useAuthStore = defineStore('auth', {
       if (await loginUser(email, password)) {
         const me = await userMe();
         if (me) {
-          this.userId = me.id;
+          this.me = me;
           localStorage.setItem(LOGGED_IN, 'true');
           return true;
         } else {
@@ -46,7 +46,7 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
       await logoutUser();
-      this.userId = null;
+      this.me = null;
       localStorage.setItem(LOGGED_IN, 'false');
     },
 
@@ -54,7 +54,7 @@ export const useAuthStore = defineStore('auth', {
       if ((await refreshUserToken()) == true) {
         const me = await userMe();
         if (me) {
-          this.userId = me.id;
+          this.me = me;
           localStorage.setItem(LOGGED_IN, 'true');
           return true;
         } else {

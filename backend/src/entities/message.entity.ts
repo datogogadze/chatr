@@ -12,6 +12,9 @@ export class MessageEntity {
   public sender_id: string;
 
   @Column()
+  public sender_name: string;
+
+  @Column()
   public chatroom_id: string;
 
   @Column()

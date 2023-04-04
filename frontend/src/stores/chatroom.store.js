@@ -42,7 +42,7 @@ export const useChatRoomStore = defineStore('chatroom', {
         this.chatrooms = this.chatrooms.filter((cr) => cr.id != roomId);
         this.chatrooms.length > 0
           ? (this.selectedRoom = this.chatrooms[0])
-          : null;
+          : (this.selectedRoom = null);
       }
     },
 

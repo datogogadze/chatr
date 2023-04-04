@@ -18,7 +18,8 @@
               # {{ room.name }}
               <button
                 v-if="
-                  authStore.userId === room.creator_id &&
+                  authStore.me &&
+                  authStore.me.id === room.creator_id &&
                   room.id === chatroomStore.getSelectedRoomId
                 "
                 type="button"
