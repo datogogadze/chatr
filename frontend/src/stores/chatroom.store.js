@@ -11,7 +11,7 @@ export const useChatRoomStore = defineStore('chatroom', {
       return state.chatrooms;
     },
     getSelectedRoomId(state) {
-      return state.selectedRoom.id;
+      return this.selectedRoom ? state.selectedRoom.id : null;
     },
   },
 
@@ -32,6 +32,7 @@ export const useChatRoomStore = defineStore('chatroom', {
           description: response.description,
           created_at: response.created_at,
         });
+        this.selectedRoom = this.chatrooms[this.chatrooms.length - 1];
       }
     },
 
@@ -39,6 +40,9 @@ export const useChatRoomStore = defineStore('chatroom', {
       const response = await deleteRoom(roomId);
       if (response) {
         this.chatrooms = this.chatrooms.filter((cr) => cr.id != roomId);
+        this.chatrooms.length > 0
+          ? (this.selectedRoom = this.chatrooms[0])
+          : null;
       }
     },
 

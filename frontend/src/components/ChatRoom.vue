@@ -49,12 +49,14 @@
 </style>
 
 <script setup>
+import { useAuthStore } from '@/stores/auth.store';
 import { useChatRoomStore } from '@/stores/chatroom.store';
 import { useMessageStore } from '@/stores/message.store';
 import { ref, watch } from 'vue';
 
 const chatroomStore = useChatRoomStore();
 const messageStore = useMessageStore();
+const authStore = useAuthStore();
 
 const newMessage = ref('');
 
@@ -62,9 +64,10 @@ const sendMessage = () => {
   if (!newMessage.value) return;
 
   const message = {
-    id: Date.now(),
-    user: 'You',
+    sender_id: authStore.userId,
+    chatroom_id: chatroomStore.getSelectedRoomId,
     text: newMessage.value,
+    created_at: Date.now(),
   };
 
   messageStore.pushMessage(message);
@@ -83,8 +86,10 @@ watch(
   () => chatroomStore.selectedRoom,
   async (newVal) => {
     try {
-      await messageStore.fetchMessages(newVal.id);
-      scrollToBottom();
+      if (newVal) {
+        await messageStore.fetchMessages(newVal.id);
+        scrollToBottom();
+      }
     } catch (error) {
       console.log('Error in chatroom watch', { error });
     }
