@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container registration-form">
     <div class="row justify-content-center mt-5">
       <div class="col-md-6">
         <div class="card">
@@ -94,3 +94,11 @@ onBeforeMount(async () => {
   }
 });
 </script>
+
+<style>
+@media only screen and (max-width: 900px) {
+  .registration-form {
+    width: 80%;
+  }
+}
+</style>
