@@ -1,13 +1,15 @@
 <template>
   <div class="container">
     <div class="row mt-5">
-      <div class="col-md-6 offset-md-5">
-        <div class="card">
-          <div class="card-header mt-1 mb-1">Chat Rooms</div>
+      <div class="col">
+        <div class="card chatroom-list-card">
+          <div class="card-header mt-1 mb-1" style="text-align: center">
+            Chat Rooms
+          </div>
           <div class="list-group">
             <button
               type="button"
-              class="list-group-item list-group-item-action"
+              class="list-group-item list-group-item-action chatroom-name"
               v-bind:class="
                 room.id == chatroomStore.getSelectedRoomId ? 'active' : ''
               "
@@ -15,7 +17,7 @@
               :key="room.id"
               @click="chatroomStore.selectRoom(room)"
             >
-              # {{ room.name }}
+              <div class="chatroom-name-text"># {{ room.name }}</div>
               <button
                 v-if="
                   authStore.me &&
@@ -23,26 +25,29 @@
                   room.id === chatroomStore.getSelectedRoomId
                 "
                 type="button"
-                class="close"
+                class="btn"
                 style="float: right"
                 @click="chatroomStore.deleteRoom(room.id)"
               >
-                <span>&times;</span>
+                <i class="bi bi-trash" style="color: white"></i>
               </button>
             </button>
             <div class="card-footer">
               <button
                 type="button"
-                class="btn btn-success mt-1 mb-1"
+                class="btn btn-primary mt-1 mb-1"
                 @click="showCreateRoomModal = true"
               >
-                Create Room
+                <i class="bi bi-plus-lg me-2"></i> Create Room
               </button>
             </div>
           </div>
         </div>
       </div>
-      <div class="modal" :class="{ 'd-block': showCreateRoomModal }">
+      <div
+        class="modal create-chatroom"
+        :class="{ 'd-block': showCreateRoomModal }"
+      >
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
@@ -119,4 +124,47 @@ onMounted(async () => {
 });
 </script>
 
-<style></style>
+<style>
+.create-chatroom {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 500px;
+  max-height: 400px;
+  background-color: white;
+  padding: 20px;
+  border: 1px solid black;
+  box-shadow: 10px 10px 5px #888888;
+}
+
+.chatroom-list-card {
+  padding: 5px;
+  border-radius: 5px;
+  width: 250px;
+  height: 500px;
+}
+
+.chatroom-name {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chatroom-name-text {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.row > * {
+  padding-left: 0;
+  padding-right: 0;
+}
+</style>

@@ -1,11 +1,13 @@
 <template>
   <div class="container">
     <div class="row mt-5">
-      <div class="col-md-8 offset-md-0">
-        <div class="card" v-if="chatroomStore.selectedRoom && isSocketOpen">
+      <div class="col">
+        <div
+          class="card chatroom-card"
+          v-if="chatroomStore.selectedRoom && isSocketOpen"
+        >
           <div class="card-header bg-primary text-white">
-            #
-            {{
+            #{{
               chatroomStore.selectedRoom
                 ? chatroomStore.selectedRoom.name
                 : 'room'
@@ -136,4 +138,14 @@ onBeforeUnmount(() => {
   socket.close();
 });
 </script>
-<style></style>
+<style>
+.chatroom-card {
+  width: 500px;
+  height: 500px;
+}
+
+.row > * {
+  padding-left: 0;
+  padding-right: 0;
+}
+</style>
