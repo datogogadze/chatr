@@ -19,9 +19,8 @@
               <p>
                 <strong
                   >{{
-                    message.sender_name === authStore.me &&
-                    authStore.me.username
-                      ? 'Me'
+                    message.sender_name === authStore?.me.username
+                      ? 'me'
                       : message.sender_name
                   }}:</strong
                 >
@@ -76,7 +75,7 @@ const authStore = useAuthStore();
 const newMessage = ref('');
 const isSocketOpen = ref(false);
 
-const sendMessage = () => {
+const sendMessage = async () => {
   if (!newMessage.value) return;
 
   const message = {
@@ -87,8 +86,10 @@ const sendMessage = () => {
     created_at: new Date(Date.now()),
   };
 
-  // messageStore.pushMessage(message);
-  socket.emit('message', message);
+  const saved = await messageStore.saveMessage(message);
+  if (saved) {
+    socket.emit('message', message);
+  }
   newMessage.value = '';
 
   scrollToBottom();
@@ -124,11 +125,13 @@ onBeforeMount(() => {
   socket.on('connect', () => {
     isSocketOpen.value = true;
   });
-
   socket.on('message', (message) => {
     messageStore.pushMessage(message);
   });
-
+  socket.on('error', (error) => {
+    console.log('WebSocket error:', error);
+    isSocketOpen.value = false;
+  });
   socket.on('disconnect', () => {
     isSocketOpen.value = false;
   });

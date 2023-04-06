@@ -110,7 +110,7 @@ export async function getAllMessagesForChatroom(id) {
   }
 }
 
-export async function sendMessage(message) {
+export async function saveMessage(message) {
   try {
     const response = await api.post(`/message`, message);
     return response.data;
