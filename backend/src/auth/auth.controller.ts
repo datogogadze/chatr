@@ -45,7 +45,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async me(@getCurrentUserId() userId: string): Promise<UserDto> {
     const user = await this.authService.getUser(userId);
-    return { id: userId, username: user.username };
+    return { id: userId, username: user.username, chatrooms: user.chatrooms };
   }
 
   @Public()

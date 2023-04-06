@@ -6,17 +6,59 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ResponseDto } from 'src/dto/response.dto';
 import { ChatroomEntity } from 'src/entities/chatroom.entity';
-import { Repository } from 'typeorm';
+import { UserEntity } from 'src/entities/user.entity';
+import { Like, Repository } from 'typeorm';
 
 @Injectable()
 export class ChatroomService {
   constructor(
     @InjectRepository(ChatroomEntity)
     private readonly chatroomRepository: Repository<ChatroomEntity>,
+
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  getAllChatrooms(userId: string): Promise<ChatroomEntity[]> {
-    return this.chatroomRepository.find();
+  async getAllChatrooms(): Promise<ChatroomEntity[]> {
+    const chatrooms = await this.chatroomRepository.find();
+    return chatrooms;
+  }
+
+  async findChatrooms(term: string): Promise<ChatroomEntity[]> {
+    return this.chatroomRepository.find({
+      select: ['id', 'name'],
+      where: {
+        name: Like(`%${term}%`),
+      },
+    });
+  }
+
+  async addUserToChatroom(
+    userId: string,
+    chatroomId: string,
+  ): Promise<ChatroomEntity> {
+    const existingUser = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!existingUser) {
+      throw new BadRequestException(`User ${userId} not found`);
+    }
+
+    const existingChatroom = await this.chatroomRepository.findOne({
+      where: { id: chatroomId },
+    });
+
+    if (!existingChatroom) {
+      throw new BadRequestException(`Chatroom ${chatroomId} not found`);
+    }
+
+    await this.userRepository.save({
+      id: userId,
+      chatrooms: [...existingUser.chatrooms, { id: chatroomId }],
+    });
+
+    return existingChatroom;
   }
 
   async createChatroom(userId: string, name: string): Promise<ChatroomEntity> {
@@ -32,6 +74,7 @@ export class ChatroomService {
       name,
       description: null,
       creator_id: userId,
+      users: [{ id: userId }],
     });
   }
 

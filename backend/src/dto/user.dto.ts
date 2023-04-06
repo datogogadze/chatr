@@ -1,4 +1,7 @@
+import { ChatroomEntity } from 'src/entities/chatroom.entity';
+
 export class UserDto {
   id: string;
-  username;
+  username: string;
+  chatrooms: ChatroomEntity[];
 }

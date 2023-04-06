@@ -3,9 +3,13 @@ import { ChatroomService } from './chatroom.service';
 import { ChatroomController } from './chatroom.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatroomEntity } from 'src/entities/chatroom.entity';
+import { UserEntity } from 'src/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ChatroomEntity])],
+  imports: [
+    TypeOrmModule.forFeature([ChatroomEntity]),
+    TypeOrmModule.forFeature([UserEntity]),
+  ],
   providers: [ChatroomService],
   controllers: [ChatroomController],
 })

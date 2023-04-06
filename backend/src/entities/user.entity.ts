@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { ChatroomEntity } from './chatroom.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -22,4 +29,17 @@ export class UserEntity {
 
   @Column()
   public updated_at: Date;
+
+  @ManyToMany(() => ChatroomEntity, (chatroom) => chatroom.users, {
+    cascade: true,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+    eager: true,
+  })
+  @JoinTable({
+    name: 'chatrooms_users',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'chatroom_id', referencedColumnName: 'id' },
+  })
+  chatrooms: ChatroomEntity[];
 }

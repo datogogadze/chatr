@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { getAllChatrooms, createChatroom, deleteRoom } from '@/api/api';
+import { createChatroom, deleteRoom } from '@/api/api';
 
 export const useChatRoomStore = defineStore('chatroom', {
   state: () => {
@@ -16,10 +16,9 @@ export const useChatRoomStore = defineStore('chatroom', {
   },
 
   actions: {
-    async fetchChatrooms() {
-      const rooms = await getAllChatrooms();
-      this.chatrooms = rooms;
-      this.selectedRoom = rooms.length > 0 ? rooms[0] : null;
+    async addChatrooms(rooms) {
+      rooms.forEach((r) => this.chatrooms.push(r));
+      this.selectedRoom = this.chatrooms.length > 0 ? this.chatrooms[0] : null;
     },
 
     async createChatroom(name) {

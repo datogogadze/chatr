@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { UserEntity } from './user.entity';
 
 @Entity('chatrooms')
 export class ChatroomEntity {
@@ -16,4 +17,7 @@ export class ChatroomEntity {
 
   @Column()
   public created_at: Date;
+
+  @ManyToMany(() => UserEntity, (user) => user.chatrooms)
+  users: UserEntity[];
 }
