@@ -39,10 +39,19 @@
           <div class="card-footer">
             <button
               type="button"
-              class="btn btn-primary mt-1 mb-1"
+              class="btn btn-primary mt-1 mb-1 add-button"
               @click="showCreateRoomModal = true"
             >
-              <i class="bi bi-plus-lg me-2"></i> Create Room
+              <i class="bi bi-plus-lg me-2"></i>
+              <div class="add-text">Add</div>
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary mt-1 mb-1 find-button"
+              @click="showFindRoomModal = true"
+            >
+              <i class="bi bi-search me-2"></i>
+              <div class="find-text">Find</div>
             </button>
           </div>
         </div>
@@ -89,20 +98,82 @@
           </div>
         </div>
       </div>
+      <div
+        class="modal find-chatroom"
+        :class="{ 'd-block': showFindRoomModal }"
+      >
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+          "
+        >
+          <div class="modal-dialog">
+            <div class="modal-content find-chatrooms-input">
+              <div class="modal-header">
+                <h5 class="modal-title">Find Chat Room</h5>
+                <button
+                  type="button"
+                  class="close"
+                  @click="showFindRoomModal = false"
+                >
+                  <span>&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                  <label for="roomName">Room Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="roomName"
+                    v-model="searchTerm"
+                    @input="findRoom"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="search-results mt-2">
+            <ul class="list-group">
+              <li
+                v-for="room in searchResults"
+                :key="room.id"
+                class="list-group-item d-flex justify-content-between align-items-center"
+              >
+                <div>{{ '# ' + room.name }}</div>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  @click="() => joinRoom(room.id)"
+                >
+                  <i class="bi bi-plus-lg me-2"></i> Join
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useChatRoomStore } from '@/stores/chatroom.store';
 import { useAuthStore } from '@/stores/auth.store';
+import { findChatrooms, addUserToRoom } from '@/api/api';
 
 const chatroomStore = useChatRoomStore();
 const authStore = useAuthStore();
 
 const showCreateRoomModal = ref(false);
+const showFindRoomModal = ref(false);
 const newRoomName = ref('');
+const searchResults = ref([]);
+const searchTerm = ref('');
 
 const createRoom = async () => {
   try {
@@ -118,13 +189,41 @@ const createRoom = async () => {
   }
 };
 
+const findRoom = async () => {
+  if (searchTerm.value.length >= 3) {
+    const data = await findChatrooms(searchTerm.value);
+    searchResults.value = data;
+  } else {
+    searchResults.value = [];
+  }
+};
+
+const joinRoom = async (roomId) => {
+  const joined = await addUserToRoom(roomId);
+  if (joined) {
+    chatroomStore.addChatrooms([joined]);
+  } else {
+    alert("Couldn't join");
+  }
+};
+
 onMounted(async () => {
   try {
-    await chatroomStore.fetchChatrooms();
+    chatroomStore.addChatrooms(authStore?.me.chatrooms);
   } catch (error) {
     console.log('Error in chatroom list onMounted', { error });
   }
 });
+
+watch(
+  () => showFindRoomModal.value,
+  (newVal) => {
+    if (!newVal) {
+      searchResults.value = [];
+      searchTerm.value = '';
+    }
+  }
+);
 </script>
 
 <style>
@@ -139,6 +238,28 @@ onMounted(async () => {
   padding: 20px;
   border: 1px solid black;
   box-shadow: 5px 5px 5px #888888;
+}
+
+.find-chatroom {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 600px;
+  height: 600px;
+  background-color: white;
+  padding: 20px;
+  border: 1px solid black;
+  box-shadow: 5px 5px 5px #888888;
+}
+
+.search-results {
+  max-height: 400px;
+  width: 500px;
+}
+
+.find-chatrooms-input {
+  width: 500px;
 }
 
 .chatroom-list-card {
@@ -169,6 +290,7 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 40px;
 }
 
 .row > * {
@@ -183,5 +305,32 @@ onMounted(async () => {
 .chatroom-names-list {
   overflow-y: auto;
   height: 450px;
+}
+
+.search-result {
+  display: flex;
+  justify-content: space-between;
+}
+
+.add-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.find-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media only screen and (max-width: 1200px) {
+  .add-text {
+    display: none;
+  }
+
+  .find-text {
+    display: none;
+  }
 }
 </style>

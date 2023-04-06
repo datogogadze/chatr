@@ -98,6 +98,26 @@ export async function getAllChatrooms() {
   }
 }
 
+export async function findChatrooms(term) {
+  try {
+    const response = await api.post('/chatroom/search', { term });
+    return response.data;
+  } catch (error) {
+    console.log('Error in findChatrooms', { error: error.response.data });
+    return [];
+  }
+}
+
+export async function addUserToRoom(chatroomId) {
+  try {
+    const response = await api.post('/chatroom/add-user', { chatroomId });
+    return response.data;
+  } catch (error) {
+    console.log('Error in findChatrooms', { error: error.response.data });
+    return undefined;
+  }
+}
+
 export async function getAllMessagesForChatroom(id) {
   try {
     const response = await api.get(`/message/chatroom/${id}`);
