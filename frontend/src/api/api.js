@@ -7,8 +7,6 @@ const api = axios.create({
 
 api.defaults.withCredentials = true;
 
-const LOGGED_IN = 'logged-in';
-
 api.interceptors.response.use(
   (resp) => resp,
   async (error) => {
@@ -25,18 +23,14 @@ api.interceptors.response.use(
             router.currentRoute.value.name !== 'Registration' &&
             router.currentRoute.value.name !== 'Login'
           ) {
-            localStorage.setItem(LOGGED_IN, 'false');
             router.push('/login');
           }
         }
       } catch (err) {
-        localStorage.setItem(LOGGED_IN, 'false');
         router.push('/login');
         return Promise.reject(err);
       }
     }
-    // localStorage.setItem(LOGGED_IN, 'false');
-    // router.push('/login');
     return Promise.reject(error);
   }
 );

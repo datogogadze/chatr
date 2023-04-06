@@ -7,8 +7,6 @@ import {
   logoutUser,
 } from '@/api/api';
 
-const LOGGED_IN = 'logged-in';
-
 export const useAuthStore = defineStore('auth', {
   state: () => {
     return { me: null };
@@ -17,15 +15,23 @@ export const useAuthStore = defineStore('auth', {
   getters: {},
 
   actions: {
+    async getMe() {
+      const me = await userMe();
+      if (me) {
+        this.me = me;
+        return true;
+      } else {
+        return false;
+      }
+    },
+
     async register(username, email, password) {
       if (await registerUser(username, email, password));
       const me = await userMe();
       if (me) {
         this.me = me;
-        localStorage.setItem(LOGGED_IN, 'true');
         return true;
       } else {
-        localStorage.setItem(LOGGED_IN, 'false');
         return false;
       }
     },
@@ -35,10 +41,8 @@ export const useAuthStore = defineStore('auth', {
         const me = await userMe();
         if (me) {
           this.me = me;
-          localStorage.setItem(LOGGED_IN, 'true');
           return true;
         } else {
-          localStorage.setItem(LOGGED_IN, 'false');
           return false;
         }
       }
@@ -47,7 +51,6 @@ export const useAuthStore = defineStore('auth', {
     async logout() {
       await logoutUser();
       this.me = null;
-      localStorage.setItem(LOGGED_IN, 'false');
     },
 
     async refreshAccessToken() {
@@ -55,10 +58,8 @@ export const useAuthStore = defineStore('auth', {
         const me = await userMe();
         if (me) {
           this.me = me;
-          localStorage.setItem(LOGGED_IN, 'true');
           return true;
         } else {
-          localStorage.setItem(LOGGED_IN, 'false');
           return false;
         }
       }

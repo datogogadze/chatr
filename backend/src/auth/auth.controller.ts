@@ -57,7 +57,7 @@ export class AuthController {
       this.setCookies(res, authData.access_token, authData.refresh_token);
       res.send({ success: true });
     } catch (error) {
-      console.log('Error in register endpoint', error);
+      console.log('Error in register endpoint', error.message);
       const statsCode =
         error?.response?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
       res.status(statsCode).send({ success: false });
@@ -75,7 +75,7 @@ export class AuthController {
 
       res.send({ success: true });
     } catch (error) {
-      console.log('Error in login endpoint', error);
+      console.log('Error in login endpoint', error.message);
       const statsCode =
         error?.response?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
       res.status(statsCode).send({ success: false });
@@ -95,7 +95,7 @@ export class AuthController {
 
       res.send({ success: true });
     } catch (error) {
-      console.log('Error in logout endpoint', error);
+      console.log('Error in logout endpoint', error.message);
       const statsCode =
         error?.response?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
       res.status(statsCode).send({ success: false });
@@ -126,7 +126,7 @@ export class AuthController {
       this.setCookies(res, accessToken.access_token, null);
       res.send({ success: true });
     } catch (error) {
-      console.log('Error in refreshToken endpoint', error);
+      console.log('Error in refreshToken endpoint', error.message);
       const statsCode =
         error?.response?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
       res.status(statsCode).send({ success: false });
