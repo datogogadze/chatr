@@ -176,6 +176,10 @@ onMounted(async () => {
   padding-right: 0;
 }
 
+.chatroom-names-list::-webkit-scrollbar {
+  display: none;
+}
+
 .chatroom-names-list {
   overflow-y: auto;
   height: 450px;

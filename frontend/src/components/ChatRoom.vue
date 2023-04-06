@@ -26,7 +26,6 @@
                 >
                 {{ message.text }}
               </p>
-              <hr />
             </div>
           </div>
           <div class="card-footer d-flex">
@@ -53,6 +52,10 @@
 </template>
 
 <style>
+.messages-container::-webkit-scrollbar {
+  display: none;
+}
+
 .messages-container {
   height: 600px;
   overflow-y: auto;
@@ -91,8 +94,6 @@ const sendMessage = async () => {
     socket.emit('message', message);
   }
   newMessage.value = '';
-
-  scrollToBottom();
 };
 
 const chatBox = ref(null);
@@ -113,7 +114,7 @@ watch(
         socket.emit('join', newVal.id);
 
         await messageStore.fetchMessages(newVal.id);
-        scrollToBottom();
+        setTimeout(() => scrollToBottom(), 1);
       }
     } catch (error) {
       console.log('Error in chatroom watch', { error });
@@ -127,6 +128,7 @@ onBeforeMount(() => {
   });
   socket.on('message', (message) => {
     messageStore.pushMessage(message);
+    setTimeout(() => scrollToBottom(), 1);
   });
   socket.on('error', (error) => {
     console.log('WebSocket error:', error);
