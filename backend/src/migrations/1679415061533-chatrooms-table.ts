@@ -7,7 +7,7 @@ export class chatroomsTable1679415061533 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE chatrooms (
               id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4() PRIMARY KEY,
-              name VARCHAR (64) NOT NULL,
+              name VARCHAR (64) NOT NULL UNIQUE,
               description VARCHAR (256),
               creator_id UUID NOT NULL,
               created_at TIMESTAMP DEFAULT NOW(),

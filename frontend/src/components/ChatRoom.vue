@@ -7,10 +7,11 @@
           v-if="chatroomStore.selectedRoom && isSocketOpen"
         >
           <div class="card-header bg-primary text-white">
-            #{{
-              chatroomStore.selectedRoom
+            {{
+              '# ' +
+              (chatroomStore.selectedRoom
                 ? chatroomStore.selectedRoom.name
-                : 'room'
+                : 'room')
             }}
           </div>
           <div class="card-body messages-container" ref="chatBox">
@@ -20,7 +21,7 @@
                   >{{
                     message.sender_name === authStore.me.username
                       ? 'Me'
-                      : authStore.me.username
+                      : message.sender_name
                   }}:</strong
                 >
                 {{ message.text }}
@@ -143,7 +144,7 @@ onBeforeUnmount(() => {
 .chatroom-card {
   width: 700px;
   height: 600px;
-  box-shadow: 10px 10px 5px #888888;
+  box-shadow: 5px 5px 5px #888888;
 }
 
 .row > * {

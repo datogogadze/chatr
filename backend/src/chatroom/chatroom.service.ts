@@ -19,7 +19,15 @@ export class ChatroomService {
     return this.chatroomRepository.find();
   }
 
-  createChatroom(userId: string, name: string): Promise<ChatroomEntity> {
+  async createChatroom(userId: string, name: string): Promise<ChatroomEntity> {
+    const existingRoom = await this.chatroomRepository.findOne({
+      where: { name },
+    });
+
+    if (existingRoom) {
+      throw new BadRequestException(`Chatroom ${name} already exists`);
+    }
+
     return this.chatroomRepository.save({
       name,
       description: null,

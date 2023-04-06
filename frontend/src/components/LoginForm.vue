@@ -75,7 +75,7 @@ async function login() {
 const LOGGED_IN = 'logged-in';
 
 onBeforeMount(async () => {
-  if (localStorage.getItem(LOGGED_IN) === 'true') {
+  if (localStorage.getItem(`${LOGGED_IN}`) === 'true') {
     router.push('/home');
     return;
   }

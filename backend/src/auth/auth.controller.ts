@@ -58,7 +58,9 @@ export class AuthController {
       res.send({ success: true });
     } catch (error) {
       console.log('Error in register endpoint', error);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ success: false });
+      const statsCode =
+        error?.response?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
+      res.status(statsCode).send({ success: false });
     }
   }
 
@@ -74,7 +76,9 @@ export class AuthController {
       res.send({ success: true });
     } catch (error) {
       console.log('Error in login endpoint', error);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ success: false });
+      const statsCode =
+        error?.response?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
+      res.status(statsCode).send({ success: false });
     }
   }
 
@@ -92,7 +96,9 @@ export class AuthController {
       res.send({ success: true });
     } catch (error) {
       console.log('Error in logout endpoint', error);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ success: false });
+      const statsCode =
+        error?.response?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
+      res.status(statsCode).send({ success: false });
     }
   }
 
@@ -121,7 +127,9 @@ export class AuthController {
       res.send({ success: true });
     } catch (error) {
       console.log('Error in refreshToken endpoint', error);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ success: false });
+      const statsCode =
+        error?.response?.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
+      res.status(statsCode).send({ success: false });
     }
   }
 }
