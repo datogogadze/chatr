@@ -84,7 +84,7 @@ const sendMessage = () => {
     sender_name: authStore.me.username,
     chatroom_id: chatroomStore.getSelectedRoomId,
     text: newMessage.value,
-    created_at: Date.now(),
+    created_at: new Date(Date.now()),
   };
 
   // messageStore.pushMessage(message);

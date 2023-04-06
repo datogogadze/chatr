@@ -17,4 +17,8 @@ export class MessageService {
       },
     });
   }
+
+  addMessageForChatroom(message: MessageEntity): Promise<MessageEntity> {
+    return this.messageRepository.save(message);
+  }
 }
