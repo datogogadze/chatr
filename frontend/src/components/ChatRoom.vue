@@ -19,7 +19,8 @@
               <p>
                 <strong
                   >{{
-                    message.sender_name === authStore.me.username
+                    message.sender_name === authStore.me &&
+                    authStore.me.username
                       ? 'Me'
                       : message.sender_name
                   }}:</strong

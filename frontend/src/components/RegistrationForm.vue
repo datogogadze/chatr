@@ -85,10 +85,9 @@ async function register() {
   }
 }
 
-const LOGGED_IN = 'logged-in';
-
 onBeforeMount(async () => {
-  if (localStorage.getItem(LOGGED_IN) === 'true') {
+  await authStore.getMe();
+  if (authStore.me) {
     router.push('/home');
     return;
   }
