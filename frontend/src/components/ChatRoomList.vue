@@ -3,44 +3,47 @@
     <div class="row mt-5">
       <div class="col">
         <div class="card chatroom-list-card">
-          <div class="card-header mt-1 mb-1" style="text-align: center">
-            Chat Rooms
-          </div>
-          <div class="list-group">
-            <button
-              type="button"
-              class="list-group-item list-group-item-action chatroom-name"
-              v-bind:class="
-                room.id == chatroomStore.getSelectedRoomId ? 'active' : ''
-              "
-              v-for="room in chatroomStore.chatrooms"
-              :key="room.id"
-              @click="chatroomStore.selectRoom(room)"
-            >
-              <div class="chatroom-name-text"># {{ room.name }}</div>
+          <div>
+            <div class="card-header mt-1 mb-1" style="text-align: center">
+              Chat Rooms
+            </div>
+            <div class="list-group chatroom-names-list">
               <button
-                v-if="
-                  authStore.me &&
-                  authStore.me.id === room.creator_id &&
-                  room.id === chatroomStore.getSelectedRoomId
+                type="button"
+                class="list-group-item list-group-item-action chatroom-name"
+                v-bind:class="
+                  room.id == chatroomStore.getSelectedRoomId ? 'active' : ''
                 "
-                type="button"
-                class="btn"
-                style="float: right"
-                @click="chatroomStore.deleteRoom(room.id)"
+                v-for="room in chatroomStore.chatrooms"
+                :key="room.id"
+                @click="chatroomStore.selectRoom(room)"
               >
-                <i class="bi bi-trash" style="color: white"></i>
-              </button>
-            </button>
-            <div class="card-footer">
-              <button
-                type="button"
-                class="btn btn-primary mt-1 mb-1"
-                @click="showCreateRoomModal = true"
-              >
-                <i class="bi bi-plus-lg me-2"></i> Create Room
+                <div class="chatroom-name-text"># {{ room.name }}</div>
+                <button
+                  v-if="
+                    authStore.me &&
+                    authStore.me.id === room.creator_id &&
+                    room.id === chatroomStore.getSelectedRoomId
+                  "
+                  type="button"
+                  class="btn"
+                  style="float: right"
+                  @click="chatroomStore.deleteRoom(room.id)"
+                >
+                  <i class="bi bi-trash" style="color: white"></i>
+                </button>
               </button>
             </div>
+          </div>
+
+          <div class="card-footer">
+            <button
+              type="button"
+              class="btn btn-primary mt-1 mb-1"
+              @click="showCreateRoomModal = true"
+            >
+              <i class="bi bi-plus-lg me-2"></i> Create Room
+            </button>
           </div>
         </div>
       </div>
@@ -130,7 +133,7 @@ onMounted(async () => {
   top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
-  max-width: 500px;
+  max-width: 600px;
   max-height: 400px;
   background-color: white;
   padding: 20px;
@@ -141,14 +144,19 @@ onMounted(async () => {
 .chatroom-list-card {
   padding: 5px;
   border-radius: 5px;
-  width: 250px;
-  height: 500px;
+  width: 350px;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 10px 10px 5px #888888;
 }
 
 .chatroom-name {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 30px;
 }
 
 .chatroom-name-text {
@@ -166,5 +174,10 @@ onMounted(async () => {
 .row > * {
   padding-left: 0;
   padding-right: 0;
+}
+
+.chatroom-names-list {
+  overflow-y: auto;
+  max-height: 450px;
 }
 </style>

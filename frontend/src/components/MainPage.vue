@@ -71,19 +71,21 @@ onBeforeMount(async () => {
   justify-content: center;
   background-color: rgb(216, 215, 215);
   width: 100%;
-  height: 100%;
+  min-height: 100%;
 }
 
 .main-page-body {
   position: relative;
-  width: 800px;
+  width: 1100px;
   display: flex;
   justify-content: space-between;
   background-color: rgb(216, 215, 215);
 }
 
 .top-navbar {
-  width: 800px;
+  width: 1100px;
+  box-shadow: 10px 10px 5px #888888;
+  z-index: 1;
 }
 
 .main-page-content {
@@ -91,6 +93,24 @@ onBeforeMount(async () => {
   flex-direction: column;
   align-items: center;
   width: 50%;
+}
+
+@media only screen and (max-width: 1200px) {
+  .main-page-body {
+    width: 800px;
+  }
+
+  .chatroom-card {
+    width: 500px;
+  }
+
+  .chatroom-list-card {
+    width: 250px;
+  }
+
+  .top-navbar {
+    width: 800px;
+  }
 }
 
 @media only screen and (max-width: 900px) {
@@ -105,10 +125,6 @@ onBeforeMount(async () => {
     transform: translateX(-100%);
     transition: transform 0.1s ease-out, visibility 0s linear 0.1s;
     visibility: hidden;
-  }
-
-  .chatroom-list .chatroom-list-card {
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   }
 
   .chatroom-list.visible {

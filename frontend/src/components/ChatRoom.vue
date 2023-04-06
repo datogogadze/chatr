@@ -32,18 +32,19 @@
             <form class="w-100" @submit.prevent="sendMessage">
               <div class="form-group d-flex align-items-center">
                 <input
+                  style="margin-right: 10px"
                   type="text"
                   class="form-control flex-grow-1"
                   placeholder="Type your message here..."
                   v-model="newMessage"
                 />
-                <button type="submit" class="btn btn-primary ml-2">Send</button>
+                <button type="submit" class="btn btn-primary">Send</button>
               </div>
             </form>
           </div>
         </div>
-        <div class="card" style="height: 200px; text-align: center" v-else>
-          <h3 class="mt-3">Chatroom not connected</h3>
+        <div class="card chatroom-card" style="text-align: center" v-else>
+          <h3 style="margin-top: 50px">Chatroom not connected</h3>
         </div>
       </div>
     </div>
@@ -52,7 +53,7 @@
 
 <style>
 .messages-container {
-  height: 500px;
+  height: 600px;
   overflow-y: auto;
 }
 </style>
@@ -140,8 +141,9 @@ onBeforeUnmount(() => {
 </script>
 <style>
 .chatroom-card {
-  width: 500px;
-  height: 500px;
+  width: 700px;
+  height: 600px;
+  box-shadow: 10px 10px 5px #888888;
 }
 
 .row > * {
