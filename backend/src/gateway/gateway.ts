@@ -41,8 +41,6 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('message')
   handleMessage(@MessageBody() body: MessageEntity) {
-    console.log(body.chatroom_id, body.text);
-
     this.server.to(body.chatroom_id).emit('message', body);
   }
 }

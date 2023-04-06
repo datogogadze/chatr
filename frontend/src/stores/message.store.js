@@ -1,4 +1,4 @@
-import { getAllMessagesForChatroom, sendMessage } from '@/api/api';
+import { getAllMessagesForChatroom, saveMessage } from '@/api/api';
 import { defineStore } from 'pinia';
 
 export const useMessageStore = defineStore('message', {
@@ -19,10 +19,11 @@ export const useMessageStore = defineStore('message', {
     },
 
     async pushMessage(message) {
-      const sent = await sendMessage(message);
-      if (sent) {
-        this.messages.push(message);
-      }
+      this.messages.push(message);
+    },
+
+    async saveMessage(message) {
+      return await saveMessage(message);
     },
   },
 });
