@@ -110,12 +110,24 @@ export async function getAllMessagesForChatroom(id) {
   }
 }
 
+export async function sendMessage(message) {
+  try {
+    const response = await api.post(`/message`, message);
+    return response.data;
+  } catch (error) {
+    console.log('Error in sendMessage', {
+      error: error.response.data,
+    });
+    return null;
+  }
+}
+
 export async function createChatroom(name) {
   try {
     const response = await api.post(`/chatroom`, { name });
     return response.data;
   } catch (error) {
-    if (error?.response?.data?.statusCode === 400) {
+    if (error.response.data.statusCode === 400) {
       alert(error.response.data.message);
     }
     console.log('Error in createChatroom', {
