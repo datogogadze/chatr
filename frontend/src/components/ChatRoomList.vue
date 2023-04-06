@@ -18,7 +18,7 @@
                 :key="room.id"
                 @click="chatroomStore.selectRoom(room)"
               >
-                <div class="chatroom-name-text"># {{ room.name }}</div>
+                <div class="chatroom-name-text">{{ '# ' + room.name }}</div>
                 <button
                   v-if="
                     authStore.me &&
@@ -138,7 +138,7 @@ onMounted(async () => {
   background-color: white;
   padding: 20px;
   border: 1px solid black;
-  box-shadow: 10px 10px 5px #888888;
+  box-shadow: 5px 5px 5px #888888;
 }
 
 .chatroom-list-card {
@@ -149,7 +149,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 10px 10px 5px #888888;
+  box-shadow: 5px 5px 5px #888888;
 }
 
 .chatroom-name {
@@ -178,6 +178,6 @@ onMounted(async () => {
 
 .chatroom-names-list {
   overflow-y: auto;
-  max-height: 450px;
+  height: 450px;
 }
 </style>

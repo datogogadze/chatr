@@ -84,7 +84,7 @@ onBeforeMount(async () => {
 
 .top-navbar {
   width: 1100px;
-  box-shadow: 10px 10px 5px #888888;
+  box-shadow: 5px 5px 5px #888888;
   z-index: 1;
 }
 

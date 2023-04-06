@@ -35,8 +35,8 @@ api.interceptors.response.use(
         return Promise.reject(err);
       }
     }
-    localStorage.setItem(LOGGED_IN, 'false');
-    router.push('/login');
+    // localStorage.setItem(LOGGED_IN, 'false');
+    // router.push('/login');
     return Promise.reject(error);
   }
 );
@@ -121,8 +121,11 @@ export async function createChatroom(name) {
     const response = await api.post(`/chatroom`, { name });
     return response.data;
   } catch (error) {
+    if (error?.response?.data?.statusCode === 400) {
+      alert(error.response.data.message);
+    }
     console.log('Error in createChatroom', {
-      error: error.response.data,
+      error: error?.response?.data,
     });
     return null;
   }
