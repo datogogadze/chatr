@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { ChatroomEntity } from './chatroom.entity';
 
 @Entity('messages')
 export class MessageEntity {
@@ -22,4 +29,8 @@ export class MessageEntity {
 
   @Column()
   public updated_at: Date;
+
+  @ManyToOne(() => ChatroomEntity, (chatroom) => chatroom.messages)
+  @JoinColumn({ name: 'chatroom_id' })
+  chatroom: ChatroomEntity;
 }

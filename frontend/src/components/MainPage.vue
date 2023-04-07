@@ -45,10 +45,14 @@ import ChatRoom from './ChatRoom.vue';
 import { onBeforeMount, ref } from 'vue';
 import { useAuthStore } from '@/stores/auth.store';
 import router from '@/router';
+import { useMessageStore } from '@/stores/message.store';
+import { useChatRoomStore } from '@/stores/chatroom.store';
 
 const authStore = useAuthStore();
 
 async function logout() {
+  useChatRoomStore().clear();
+  useMessageStore().clear();
   await authStore.logout();
   router.push('/login');
 }

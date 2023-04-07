@@ -16,7 +16,7 @@
                 "
                 v-for="room in chatroomStore.chatrooms"
                 :key="room.id"
-                @click="chatroomStore.selectRoom(room)"
+                @click="() => chatroomStore.selectRoom(room)"
               >
                 <div class="chatroom-name-text">{{ '# ' + room.name }}</div>
                 <button
@@ -201,7 +201,7 @@ const findRoom = async () => {
 const joinRoom = async (roomId) => {
   const joined = await addUserToRoom(roomId);
   if (joined) {
-    chatroomStore.addChatrooms([joined]);
+    chatroomStore.pushChatroom(joined);
   } else {
     alert("Couldn't join");
   }

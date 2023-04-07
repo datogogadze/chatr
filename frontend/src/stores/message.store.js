@@ -25,5 +25,9 @@ export const useMessageStore = defineStore('message', {
     async saveMessage(message) {
       return await saveMessage(message);
     },
+
+    clear() {
+      this.messages = [];
+    },
   },
 });

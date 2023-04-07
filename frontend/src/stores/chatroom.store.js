@@ -16,9 +16,14 @@ export const useChatRoomStore = defineStore('chatroom', {
   },
 
   actions: {
-    async addChatrooms(rooms) {
-      rooms.forEach((r) => this.chatrooms.push(r));
+    addChatrooms(rooms) {
+      this.chatrooms = rooms;
       this.selectedRoom = this.chatrooms.length > 0 ? this.chatrooms[0] : null;
+    },
+
+    pushChatroom(room) {
+      this.chatrooms.push(room);
+      this.selectedRoom = room;
     },
 
     async createChatroom(name) {
@@ -47,6 +52,11 @@ export const useChatRoomStore = defineStore('chatroom', {
 
     selectRoom(room) {
       this.selectedRoom = room;
+    },
+
+    clear() {
+      this.chatrooms = [];
+      this.selectedRoom = null;
     },
   },
 });

@@ -15,7 +15,8 @@ export class messagesTable1679415103414 implements MigrationInterface {
               updated_at TIMESTAMP DEFAULT NOW(),
               CONSTRAINT fk_message_chatroom
                   FOREIGN KEY(chatroom_id) 
-                      REFERENCES chatrooms(id),
+                      REFERENCES chatrooms(id)
+                      ON DELETE CASCADE,
               CONSTRAINT fk_message_user
                   FOREIGN KEY(sender_id) 
                       REFERENCES users(id)
