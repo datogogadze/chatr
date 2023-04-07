@@ -39,19 +39,19 @@
           <div class="card-footer">
             <button
               type="button"
-              class="btn btn-primary mt-1 mb-1 add-button"
-              @click="showCreateRoomModal = true"
+              class="btn btn-primary mt-1 mb-1 add-button d-flex align-items-center"
+              @click="handleAddButtonClick"
             >
-              <i class="bi bi-plus-lg me-2"></i>
-              <div class="add-text">Add</div>
+              <i class="bi bi-plus-lg"></i>
+              <div class="add-text ms-2">Add</div>
             </button>
             <button
               type="button"
               class="btn btn-primary mt-1 mb-1 find-button"
-              @click="showFindRoomModal = true"
+              @click="handleFindButtonClick"
             >
-              <i class="bi bi-search me-2"></i>
-              <div class="find-text">Find</div>
+              <i class="bi bi-search"></i>
+              <div class="find-text ms-2">Find</div>
             </button>
           </div>
         </div>
@@ -66,10 +66,10 @@
               <h5 class="modal-title">Create New Chat Room</h5>
               <button
                 type="button"
-                class="close"
+                class="btn btn-outline-danger"
                 @click="showCreateRoomModal = false"
               >
-                <span>&times;</span>
+                <i class="bi bi-x bi-sm"></i>
               </button>
             </div>
             <div class="modal-body">
@@ -80,6 +80,8 @@
                   class="form-control"
                   id="roomName"
                   v-model="newRoomName"
+                  @keypress.enter="createRoom"
+                  ref="createInput"
                 />
               </div>
             </div>
@@ -102,24 +104,17 @@
         class="modal find-chatroom"
         :class="{ 'd-block': showFindRoomModal }"
       >
-        <div
-          style="
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-          "
-        >
+        <div class="find-room-modal">
           <div class="modal-dialog">
             <div class="modal-content find-chatrooms-input">
               <div class="modal-header">
                 <h5 class="modal-title">Find Chat Room</h5>
                 <button
                   type="button"
-                  class="close"
+                  class="btn btn-outline-danger"
                   @click="showFindRoomModal = false"
                 >
-                  <span>&times;</span>
+                  <i class="bi bi-x bi-sm"></i>
                 </button>
               </div>
               <div class="modal-body">
@@ -131,6 +126,7 @@
                     id="roomName"
                     v-model="searchTerm"
                     @input="findRoom"
+                    ref="findInput"
                   />
                 </div>
               </div>
@@ -145,6 +141,7 @@
               >
                 <div>{{ '# ' + room.name }}</div>
                 <button
+                  v-if="isNotJoined(room.id)"
                   type="button"
                   class="btn btn-primary"
                   @click="() => joinRoom(room.id)"
@@ -174,6 +171,8 @@ const showFindRoomModal = ref(false);
 const newRoomName = ref('');
 const searchResults = ref([]);
 const searchTerm = ref('');
+const createInput = ref(null);
+const findInput = ref(null);
 
 const createRoom = async () => {
   try {
@@ -207,8 +206,44 @@ const joinRoom = async (roomId) => {
   }
 };
 
+const isNotJoined = (roomId) => {
+  const hasRoom = authStore?.me.chatrooms.find((r) => r.id === roomId);
+  if (hasRoom) {
+    return false;
+  }
+  return true;
+};
+
+const closeModals = () => {
+  showCreateRoomModal.value = false;
+  showFindRoomModal.value = false;
+};
+
+const handleAddButtonClick = () => {
+  if (showFindRoomModal.value) {
+    showCreateRoomModal.value = false;
+  } else {
+    showCreateRoomModal.value = true;
+  }
+  if (createInput.value) {
+    setTimeout(() => createInput.value.focus(), 1);
+  }
+};
+
+const handleFindButtonClick = () => {
+  if (showCreateRoomModal.value) {
+    showFindRoomModal.value = false;
+  } else {
+    showFindRoomModal.value = true;
+  }
+  if (findInput.value) {
+    setTimeout(() => findInput.value.focus(), 1);
+  }
+};
+
 onMounted(async () => {
   try {
+    window.addEventListener('keydown', closeModals);
     chatroomStore.addChatrooms(authStore?.me.chatrooms);
   } catch (error) {
     console.log('Error in chatroom list onMounted', { error });
@@ -322,6 +357,13 @@ watch(
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.find-room-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 @media only screen and (max-width: 1200px) {
