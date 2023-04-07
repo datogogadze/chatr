@@ -31,9 +31,6 @@ export class UserEntity {
   public updated_at: Date;
 
   @ManyToMany(() => ChatroomEntity, (chatroom) => chatroom.users, {
-    cascade: true,
-    onUpdate: 'CASCADE',
-    onDelete: 'CASCADE',
     eager: true,
   })
   @JoinTable({

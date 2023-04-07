@@ -13,10 +13,12 @@ export class createChatroomsUsersTable1680807465947
             chatroom_id UUID NOT NULL,
             CONSTRAINT fk_chatrooms_users_user
             FOREIGN KEY(user_id)
-                REFERENCES users(id),
+                REFERENCES users(id)
+                ON DELETE CASCADE,
             CONSTRAINT fk_chatrooms_users_chatroom
             FOREIGN KEY(chatroom_id)
                 REFERENCES chatrooms(id)
+                ON DELETE CASCADE
     )`,
     );
   }

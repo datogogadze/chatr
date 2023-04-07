@@ -27,7 +27,12 @@ api.interceptors.response.use(
           }
         }
       } catch (err) {
-        router.push('/login');
+        if (
+          router.currentRoute.value.name !== 'Registration' &&
+          router.currentRoute.value.name !== 'Login'
+        ) {
+          router.push('/login');
+        }
         return Promise.reject(err);
       }
     }
