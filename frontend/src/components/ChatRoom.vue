@@ -37,6 +37,7 @@
                   class="form-control flex-grow-1"
                   placeholder="Type your message here..."
                   v-model="newMessage"
+                  ref="inputBox"
                 />
                 <button type="submit" class="btn btn-primary">Send</button>
               </div>
@@ -97,9 +98,13 @@ const sendMessage = async () => {
 };
 
 const chatBox = ref(null);
+const inputBox = ref(null);
+
 const scrollToBottom = () => {
   if (!chatBox.value) return;
   chatBox.value.scrollTop = chatBox.value.scrollHeight;
+  if (!inputBox.value) return;
+  inputBox.value.focus();
 };
 
 watch(
@@ -114,7 +119,9 @@ watch(
         socket.emit('join', newVal.id);
 
         await messageStore.fetchMessages(newVal.id);
-        setTimeout(() => scrollToBottom(), 1);
+        setTimeout(() => {
+          scrollToBottom();
+        }, 1);
       }
     } catch (error) {
       console.log('Error in chatroom watch', { error });
@@ -128,7 +135,9 @@ onBeforeMount(() => {
   });
   socket.on('message', (message) => {
     messageStore.pushMessage(message);
-    setTimeout(() => scrollToBottom(), 1);
+    setTimeout(() => {
+      scrollToBottom();
+    }, 1);
   });
   socket.on('error', (error) => {
     console.log('WebSocket error:', error);
