@@ -1,12 +1,24 @@
 version: '3.8'
 services:
+  frontend:
+    build: ../frontend
+    ports:
+      - '8081:8080'
+    env_file:
+      - .env.frontend
+
+  backend:
+    build: ../backend
+    ports:
+      - '3001:3000'
+    env_file:
+      - .env.backend
+
   db:
     image: postgres:14.1-alpine
     restart: always
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=speakr
+    env_file:
+      - .env.db
 
     ports:
       - '5435:5432'
