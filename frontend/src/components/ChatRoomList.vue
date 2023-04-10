@@ -243,7 +243,11 @@ const handleFindButtonClick = () => {
 
 onMounted(async () => {
   try {
-    window.addEventListener('keydown', closeModals);
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeModals();
+      }
+    });
     chatroomStore.addChatrooms(authStore?.me.chatrooms);
   } catch (error) {
     console.log('Error in chatroom list onMounted', { error });
