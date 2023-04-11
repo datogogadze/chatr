@@ -41,6 +41,7 @@
               type="button"
               class="btn btn-primary mt-1 mb-1 add-button d-flex align-items-center"
               @click="handleAddButtonClick"
+              ref="createButton"
             >
               <i class="bi bi-plus-lg"></i>
               <div class="add-text ms-2">Add</div>
@@ -49,6 +50,7 @@
               type="button"
               class="btn btn-primary mt-1 mb-1 find-button"
               @click="handleFindButtonClick"
+              ref="findButton"
             >
               <i class="bi bi-search"></i>
               <div class="find-text ms-2">Find</div>
@@ -59,6 +61,7 @@
       <div
         class="modal create-chatroom"
         :class="{ 'd-block': showCreateRoomModal }"
+        ref="createModal"
       >
         <div class="modal-dialog">
           <div class="modal-content">
@@ -103,53 +106,52 @@
       <div
         class="modal find-chatroom"
         :class="{ 'd-block': showFindRoomModal }"
+        ref="findModal"
       >
-        <div class="find-room-modal">
-          <div class="modal-dialog">
-            <div class="modal-content find-chatrooms-input">
-              <div class="modal-header">
-                <h5 class="modal-title">Find Chat Room</h5>
-                <button
-                  type="button"
-                  class="btn btn-outline-danger"
-                  @click="showFindRoomModal = false"
-                >
-                  <i class="bi bi-x bi-sm"></i>
-                </button>
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Find Chat Room</h5>
+              <button
+                type="button"
+                class="btn btn-outline-danger"
+                @click="showFindRoomModal = false"
+              >
+                <i class="bi bi-x bi-sm"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group mb-10">
+                <label for="roomName">Room Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="roomName"
+                  v-model="searchTerm"
+                  @input="findRoom"
+                  ref="findInput"
+                />
               </div>
-              <div class="modal-body">
-                <div class="form-group">
-                  <label for="roomName">Room Name</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="roomName"
-                    v-model="searchTerm"
-                    @input="findRoom"
-                    ref="findInput"
-                  />
-                </div>
+              <div class="search-results">
+                <ul class="list-group">
+                  <li
+                    v-for="room in searchResults"
+                    :key="room.id"
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <div>{{ '# ' + room.name }}</div>
+                    <button
+                      v-if="isNotJoined(room.id)"
+                      type="button"
+                      class="btn btn-primary"
+                      @click="() => joinRoom(room.id)"
+                    >
+                      <i class="bi bi-plus-lg me-2"></i> Join
+                    </button>
+                  </li>
+                </ul>
               </div>
             </div>
-          </div>
-          <div class="search-results mt-2">
-            <ul class="list-group">
-              <li
-                v-for="room in searchResults"
-                :key="room.id"
-                class="list-group-item d-flex justify-content-between align-items-center"
-              >
-                <div>{{ '# ' + room.name }}</div>
-                <button
-                  v-if="isNotJoined(room.id)"
-                  type="button"
-                  class="btn btn-primary"
-                  @click="() => joinRoom(room.id)"
-                >
-                  <i class="bi bi-plus-lg me-2"></i> Join
-                </button>
-              </li>
-            </ul>
           </div>
         </div>
       </div>
@@ -173,6 +175,10 @@ const searchResults = ref([]);
 const searchTerm = ref('');
 const createInput = ref(null);
 const findInput = ref(null);
+const createModal = ref(null);
+const findModal = ref(null);
+const createButton = ref(null);
+const findButton = ref(null);
 
 const createRoom = async () => {
   try {
@@ -248,6 +254,16 @@ onMounted(async () => {
         closeModals();
       }
     });
+
+    window.addEventListener('click', (event) => {
+      if (showCreateRoomModal.value && createModal.value === event.target) {
+        showCreateRoomModal.value = false;
+      }
+      if (showFindRoomModal.value && findModal.value === event.target) {
+        showFindRoomModal.value = false;
+      }
+    });
+
     chatroomStore.addChatrooms(authStore?.me.chatrooms);
   } catch (error) {
     console.log('Error in chatroom list onMounted', { error });
@@ -267,26 +283,18 @@ watch(
 
 <style>
 .create-chatroom {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 600px;
-  max-height: 400px;
-  background-color: white;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
   padding: 20px;
   border: 1px solid black;
   box-shadow: 5px 5px 5px #888888;
 }
 
 .find-chatroom {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 600px;
-  height: 600px;
-  background-color: white;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
   padding: 20px;
   border: 1px solid black;
   box-shadow: 5px 5px 5px #888888;
@@ -294,11 +302,6 @@ watch(
 
 .search-results {
   max-height: 400px;
-  width: 500px;
-}
-
-.find-chatrooms-input {
-  width: 500px;
 }
 
 .chatroom-list-card {
@@ -361,13 +364,6 @@ watch(
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.find-room-modal {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
 }
 
 @media only screen and (max-width: 1200px) {
