@@ -13,5 +13,11 @@ module.exports = defineConfig({
   },
   devServer: {
     historyApiFallback: true,
+    server: {
+      type: 'http',
+    },
+    client: {
+      webSocketURL: `auto://0.0.0.0:0/ws`,
+    },
   },
 });
