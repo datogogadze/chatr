@@ -162,12 +162,12 @@ export async function createChatroom(name) {
   }
 }
 
-export async function deleteRoom(id) {
+export async function removeUserFromChatroom(id) {
   try {
-    const response = await api.delete(`/chatroom/${id}`);
+    const response = await api.delete(`/chatroom/${id}/user`);
     return response.data;
   } catch (error) {
-    console.log('Error in deleteRoom', {
+    console.log('Error in removeUserFromChatroom', {
       error: error.response.data,
     });
     return null;

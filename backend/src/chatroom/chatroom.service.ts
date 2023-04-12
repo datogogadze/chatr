@@ -78,7 +78,7 @@ export class ChatroomService {
     });
   }
 
-  async deleteChatroom(userId, roomId): Promise<ChatroomEntity> {
+  async removeUserFromChatroom(userId, roomId): Promise<ChatroomEntity> {
     const existingRoom = await this.chatroomRepository.findOne({
       where: { id: roomId },
     });
@@ -87,11 +87,20 @@ export class ChatroomService {
       throw new BadRequestException(`Wrong room id ${roomId}`);
     }
 
-    if (existingRoom.creator_id !== userId) {
-      throw new ForbiddenException(`User ${userId} can't delete ${roomId}`);
+    const existingUser = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!existingUser) {
+      throw new BadRequestException(`Wrong user id ${userId}`);
     }
 
-    await this.chatroomRepository.delete(roomId);
+    existingUser.chatrooms = existingUser.chatrooms.filter(
+      (r) => r.id != roomId,
+    );
+
+    await this.userRepository.save(existingUser);
+
     return existingRoom;
   }
 }

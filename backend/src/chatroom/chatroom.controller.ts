@@ -4,7 +4,6 @@ import { ChatroomService } from './chatroom.service';
 import { getCurrentUserId } from 'src/decorators/get-user-id.decorator';
 import { ChatroomSearchDto } from 'src/dto/chatroom-search.dto';
 import { AddUserDto } from 'src/dto/chatroom-user.dto';
-import { ResponseDto } from 'src/dto/response.dto';
 
 @Controller('chatroom')
 export class ChatroomController {
@@ -36,11 +35,11 @@ export class ChatroomController {
     return this.chatroomService.createChatroom(userId, body.name);
   }
 
-  @Delete('/:id')
-  deleteChatroom(
+  @Delete('/:id/user')
+  removeUserFromChatroom(
     @getCurrentUserId() userId,
     @Param('id') id: string,
   ): Promise<ChatroomEntity> {
-    return this.chatroomService.deleteChatroom(userId, id);
+    return this.chatroomService.removeUserFromChatroom(userId, id);
   }
 }
