@@ -20,15 +20,11 @@
               >
                 <div class="chatroom-name-text">{{ '# ' + room.name }}</div>
                 <button
-                  v-if="
-                    authStore.me &&
-                    authStore.me.id === room.creator_id &&
-                    room.id === chatroomStore.getSelectedRoomId
-                  "
+                  v-if="room.id === chatroomStore.getSelectedRoomId"
                   type="button"
                   class="btn"
                   style="float: right"
-                  @click="chatroomStore.deleteRoom(room.id)"
+                  @click="chatroomStore.removeUser(room.id)"
                 >
                   <i class="bi bi-trash" style="color: white"></i>
                 </button>
@@ -195,7 +191,7 @@ const createRoom = async () => {
 };
 
 const findRoom = async () => {
-  if (searchTerm.value.length >= 3) {
+  if (searchTerm.value.length >= 1) {
     const data = await findChatrooms(searchTerm.value);
     searchResults.value = data;
   } else {

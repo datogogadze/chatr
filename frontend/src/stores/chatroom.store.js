@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { createChatroom, deleteRoom } from '@/api/api';
+import { createChatroom, removeUserFromChatroom } from '@/api/api';
 
 export const useChatRoomStore = defineStore('chatroom', {
   state: () => {
@@ -17,13 +17,34 @@ export const useChatRoomStore = defineStore('chatroom', {
 
   actions: {
     addChatrooms(rooms) {
-      this.chatrooms = rooms;
-      this.selectedRoom = this.chatrooms.length > 0 ? this.chatrooms[0] : null;
+      if (rooms) {
+        this.chatrooms = rooms;
+        const roomId = localStorage.getItem('selectedRoomId');
+        let room = false;
+        if (roomId) {
+          room = this.chatrooms.find((r) => r.id === roomId);
+        }
+
+        if (roomId && room) {
+          this.selectedRoom = room;
+        } else {
+          if (this.chatrooms.length > 0) {
+            this.selectedRoom = this.chatrooms[0];
+            localStorage.setItem('selectedRoomId', this.selectedRoom.id);
+          } else {
+            this.selectedRoom = null;
+            localStorage.removeItem('selectedRoomId');
+          }
+        }
+      }
     },
 
     pushChatroom(room) {
-      this.chatrooms.push(room);
-      this.selectedRoom = room;
+      if (room) {
+        this.chatrooms.push(room);
+        this.selectedRoom = room;
+        localStorage.setItem('selectedRoomId', this.selectedRoom.id);
+      }
     },
 
     async createChatroom(name) {
@@ -37,26 +58,37 @@ export const useChatRoomStore = defineStore('chatroom', {
           created_at: response.created_at,
         });
         this.selectedRoom = this.chatrooms[this.chatrooms.length - 1];
+        localStorage.setItem('selectedRoomId', this.selectedRoom.id);
       }
     },
 
-    async deleteRoom(roomId) {
-      const response = await deleteRoom(roomId);
+    async removeUser(roomId) {
+      const response = await removeUserFromChatroom(roomId);
       if (response) {
         this.chatrooms = this.chatrooms.filter((cr) => cr.id != roomId);
-        this.chatrooms.length > 0
-          ? (this.selectedRoom = this.chatrooms[0])
-          : (this.selectedRoom = null);
+        if (this.chatrooms.length > 0) {
+          this.selectedRoom = this.chatrooms[0];
+          localStorage.setItem('selectedRoomId', this.selectedRoom.id);
+        } else {
+          this.selectedRoom = null;
+          localStorage.removeItem('selectedRoomId');
+        }
       }
     },
 
     selectRoom(room) {
       this.selectedRoom = room;
+      if (room) {
+        localStorage.setItem('selectedRoomId', room.id);
+      } else {
+        localStorage.removeItem('selectedRoomId');
+      }
     },
 
     clear() {
       this.chatrooms = [];
       this.selectedRoom = null;
+      localStorage.removeItem('selectedRoomId');
     },
   },
 });
