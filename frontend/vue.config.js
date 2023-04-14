@@ -1,7 +1,7 @@
 const { defineConfig } = require('@vue/cli-service');
 module.exports = defineConfig({
   transpileDependencies: true,
-  publicPath: './',
+  publicPath: '/',
   configureWebpack: {
     entry: './src/main.js',
   },
@@ -11,13 +11,16 @@ module.exports = defineConfig({
       return args;
     });
   },
-  devServer: {
-    historyApiFallback: true,
-    server: {
-      type: 'http',
-    },
-    client: {
-      webSocketURL: `auto://0.0.0.0:0/ws`,
-    },
-  },
+  devServer:
+    process.env.NODE_ENV !== 'production'
+      ? {
+          historyApiFallback: true,
+          server: {
+            type: 'http',
+          },
+          client: {
+            webSocketURL: `auto://0.0.0.0:0/ws`,
+          },
+        }
+      : undefined,
 });

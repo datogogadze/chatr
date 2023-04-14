@@ -9,7 +9,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req) => {
-          if (req && req.cookies) {
+          if (req && req.cookies && req.cookies['refresh_token']) {
             return req.cookies['refresh_token'];
           }
           return null;
@@ -25,7 +25,7 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
       const refreshToken = req.cookies['refresh_token'];
       return { ...payload, refreshToken };
     } else {
-      throw new UnauthorizedException(`No refresh token ${payload['sub']}`);
+      throw new UnauthorizedException(`No refresh token`);
     }
   }
 }
