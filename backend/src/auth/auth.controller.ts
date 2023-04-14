@@ -35,7 +35,7 @@ export class AuthController {
     if (refresh_token) {
       res.cookie('refresh_token', `${refresh_token}`, {
         httpOnly: true,
-        path: '/auth/refresh',
+        path: '/api/auth/refresh',
         maxAge: Number(process.env.JWT_REFRESH_TOKEN_TTL),
       });
     }

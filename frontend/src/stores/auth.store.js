@@ -15,16 +15,6 @@ export const useAuthStore = defineStore('auth', {
   getters: {},
 
   actions: {
-    async getMe() {
-      const me = await userMe();
-      if (me) {
-        this.me = me;
-        return true;
-      } else {
-        return false;
-      }
-    },
-
     async register(username, email, password) {
       if (await registerUser(username, email, password));
       const me = await userMe();

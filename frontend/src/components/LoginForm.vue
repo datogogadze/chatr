@@ -73,8 +73,7 @@ async function login() {
 }
 
 onBeforeMount(async () => {
-  await authStore.getMe();
-  if (authStore.me) {
+  if ((await authStore.refreshAccessToken()) && authStore.me) {
     router.push('/home');
     return;
   }

@@ -86,7 +86,7 @@ async function register() {
 }
 
 onBeforeMount(async () => {
-  await authStore.getMe();
+  await authStore.refreshAccessToken();
   if (authStore.me) {
     router.push('/home');
     return;
