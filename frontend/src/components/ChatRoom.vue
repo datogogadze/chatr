@@ -70,7 +70,7 @@ import { useMessageStore } from '@/stores/message.store';
 import { ref, watch, onBeforeUnmount, onBeforeMount } from 'vue';
 import { io } from 'socket.io-client';
 
-const socket = io(process.env.VUE_APP_API_URL);
+let socket = null;
 
 const chatroomStore = useChatRoomStore();
 const messageStore = useMessageStore();
@@ -127,19 +127,37 @@ watch(
 );
 
 onBeforeMount(() => {
+  try {
+    socket = io(process.env.VUE_APP_API_URL, {
+      auth: {
+        token: `Bearer ${authStore.access_token.access_token}`,
+      },
+    });
+  } catch (error) {
+    console.log(socket);
+  }
+
   socket.on('connect', () => {
     isSocketOpen.value = true;
   });
+
   socket.on('message', (message) => {
     messageStore.pushMessage(message);
     setTimeout(() => {
       scrollToBottom();
     }, 1);
   });
+
   socket.on('error', (error) => {
     console.log('WebSocket error:', error);
     isSocketOpen.value = false;
   });
+
+  socket.on('connect_error', (error) => {
+    console.log('Connection failed:', error);
+    console.log({ socket });
+  });
+
   socket.on('disconnect', () => {
     isSocketOpen.value = false;
   });
