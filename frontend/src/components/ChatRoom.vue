@@ -139,6 +139,9 @@ onBeforeMount(() => {
 
   socket.on('connect', () => {
     isSocketOpen.value = true;
+    if (chatroomStore.getSelectedRoomId) {
+      socket.emit('join', chatroomStore.getSelectedRoomId);
+    }
   });
 
   socket.on('message', (message) => {
@@ -155,7 +158,7 @@ onBeforeMount(() => {
 
   socket.on('connect_error', (error) => {
     console.log('Connection failed:', error);
-    console.log({ socket });
+    isSocketOpen.value = false;
   });
 
   socket.on('disconnect', () => {

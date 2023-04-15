@@ -70,8 +70,6 @@ export class AppGateway
     @ConnectedSocket() client: CustomSocket,
     @MessageBody() message: MessageEntity,
   ) {
-    console.log(client.user);
-
     if (!client.user) {
       client.disconnect();
     }
@@ -105,21 +103,16 @@ export class AppGateway
       client.messages = [];
     }
 
-    console.log(message.chatroom_id, message);
-
     this.server.to(message.chatroom_id).emit('message', message);
   }
 
   async saveMessagesInTransaction(messages: MessageEntity[]) {
-    if (messages.length === 0) return;
     const queryRunner = this.entityManager.connection.createQueryRunner();
 
     await queryRunner.startTransaction();
 
     try {
-      for (const message of messages) {
-        await this.messageRepository.save(message);
-      }
+      this.entityManager.insert(MessageEntity, messages);
 
       await queryRunner.commitTransaction();
     } catch (error) {
