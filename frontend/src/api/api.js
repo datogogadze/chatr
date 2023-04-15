@@ -42,11 +42,15 @@ api.interceptors.response.use(
 
 export async function registerUser(username, email, password) {
   try {
-    await api.post('/api/auth/register', { username, email, password });
-    return true;
+    const response = await api.post('/api/auth/register', {
+      username,
+      email,
+      password,
+    });
+    return response.data;
   } catch (error) {
     console.log('Error in registerUser', { error: error.response.data });
-    return false;
+    return null;
   }
 }
 
@@ -62,11 +66,11 @@ export async function userMe() {
 
 export async function loginUser(email, password) {
   try {
-    await api.post('/api/auth/login', { email, password });
-    return true;
+    const response = await api.post('/api/auth/login', { email, password });
+    return response.data;
   } catch (error) {
     console.log('Error in loginUser', { error: error.response.data });
-    return false;
+    return null;
   }
 }
 
@@ -84,12 +88,12 @@ export async function refreshUserToken() {
   try {
     const response = await api.post('/api/auth/refresh');
     if (response.status === 200) {
-      return true;
+      return response.data;
     }
-    return false;
+    return null;
   } catch (error) {
     console.log('refresh token failed', error?.response.status);
-    return false;
+    return null;
   }
 }
 

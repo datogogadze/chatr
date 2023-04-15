@@ -9,17 +9,19 @@ import {
 
 export const useAuthStore = defineStore('auth', {
   state: () => {
-    return { me: null };
+    return { me: null, access_token: null };
   },
 
   getters: {},
 
   actions: {
     async register(username, email, password) {
-      if (await registerUser(username, email, password));
+      const data = await registerUser(username, email, password);
+      if (data);
       const me = await userMe();
       if (me) {
         this.me = me;
+        this.access_token = data.access_token;
         return true;
       } else {
         return false;
@@ -27,10 +29,12 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async login(email, password) {
-      if (await loginUser(email, password)) {
+      const data = await loginUser(email, password);
+      if (data) {
         const me = await userMe();
         if (me) {
           this.me = me;
+          this.access_token = data.access_token;
           return true;
         } else {
           return false;
@@ -41,13 +45,16 @@ export const useAuthStore = defineStore('auth', {
     async logout() {
       await logoutUser();
       this.me = null;
+      this.access_token = null;
     },
 
     async refreshAccessToken() {
-      if ((await refreshUserToken()) == true) {
+      const data = await refreshUserToken();
+      if (data) {
         const me = await userMe();
         if (me) {
           this.me = me;
+          this.access_token = data.access_token;
           return true;
         } else {
           return false;

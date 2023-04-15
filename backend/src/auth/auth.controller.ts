@@ -55,7 +55,7 @@ export class AuthController {
     try {
       const authData: TokenDto = await this.authService.register(user);
       this.setCookies(res, authData.access_token, authData.refresh_token);
-      res.send({ success: true });
+      res.send({ success: true, access_token: authData.access_token });
     } catch (error) {
       console.log('Error in register endpoint', error.message);
       const statsCode =
@@ -73,7 +73,7 @@ export class AuthController {
 
       this.setCookies(res, authData.access_token, authData.refresh_token);
 
-      res.send({ success: true });
+      res.send({ success: true, access_token: authData.access_token });
     } catch (error) {
       console.log('Error in login endpoint', error.message);
       const statsCode =
@@ -124,7 +124,7 @@ export class AuthController {
       const accessToken: AccessToken =
         await this.authService.refreshAccessToken(userId, refreshToken);
       this.setCookies(res, accessToken.access_token, null);
-      res.send({ success: true });
+      res.send({ success: true, access_token: accessToken });
     } catch (error) {
       console.log('Error in refreshToken endpoint', error.message);
       const statsCode =
