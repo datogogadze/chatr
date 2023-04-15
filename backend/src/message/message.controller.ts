@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { MessageEntity } from 'src/entities/message.entity';
 import { MessageService } from './message.service';
 
@@ -9,12 +9,5 @@ export class MessageController {
   @Get('chatroom/:id')
   getAllMessagesForChatroom(@Param('id') id: string): Promise<MessageEntity[]> {
     return this.messageService.getAllMessagesForChatroom(id);
-  }
-
-  @Post()
-  addMessageForChatroom(
-    @Body() message: MessageEntity,
-  ): Promise<MessageEntity> {
-    return this.messageService.addMessageForChatroom(message);
   }
 }
