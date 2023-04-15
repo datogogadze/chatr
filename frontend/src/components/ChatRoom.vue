@@ -67,7 +67,7 @@
 import { useAuthStore } from '@/stores/auth.store';
 import { useChatRoomStore } from '@/stores/chatroom.store';
 import { useMessageStore } from '@/stores/message.store';
-import { ref, watch, onBeforeUnmount, onBeforeMount } from 'vue';
+import { ref, watch, onBeforeUnmount, onBeforeMount, onUpdated } from 'vue';
 import { io } from 'socket.io-client';
 
 let socket = null;
@@ -116,15 +116,16 @@ watch(
         socket.emit('join', newVal.id);
 
         await messageStore.fetchMessages(newVal.id);
-        setTimeout(() => {
-          scrollToBottom();
-        }, 1);
       }
     } catch (error) {
       console.log('Error in chatroom watch', { error });
     }
   }
 );
+
+onUpdated(() => {
+  scrollToBottom();
+});
 
 onBeforeMount(() => {
   try {
@@ -146,9 +147,6 @@ onBeforeMount(() => {
 
   socket.on('message', (message) => {
     messageStore.pushMessage(message);
-    setTimeout(() => {
-      scrollToBottom();
-    }, 1);
   });
 
   socket.on('error', (error) => {
