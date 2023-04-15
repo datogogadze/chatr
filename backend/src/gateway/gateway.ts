@@ -30,8 +30,6 @@ export class AppGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(
-    @InjectRepository(MessageEntity)
-    private readonly messageRepository: Repository<MessageEntity>,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly entityManager: EntityManager,
@@ -49,7 +47,9 @@ export class AppGateway
   }
 
   handleDisconnect(client: CustomSocket) {
-    this.saveMessagesInTransaction(client.messages);
+    if (client.messages.length > 0) {
+      this.saveMessageBatch(client.messages);
+    }
     console.log('Client disconnected: ', client.user.username);
   }
 
@@ -65,11 +65,7 @@ export class AppGateway
     client.leave(room);
   }
 
-  @SubscribeMessage('message')
-  async handleMessage(
-    @ConnectedSocket() client: CustomSocket,
-    @MessageBody() message: MessageEntity,
-  ) {
+  async validateUser(client: CustomSocket, message) {
     if (!client.user) {
       client.disconnect();
     }
@@ -86,27 +82,38 @@ export class AppGateway
       throw new BadRequestException(`User doesn't exist ${message.sender_id}`);
     }
 
-    const inChatroom = existingUser.chatrooms.some(
-      (c) => c.id === message.chatroom_id,
-    );
+    return existingUser;
+  }
+
+  async validateChatroom(user, message) {
+    const inChatroom = user.chatrooms.some((c) => c.id === message.chatroom_id);
 
     if (!inChatroom) {
       throw new BadRequestException(
         `User not in chatroom ${message.chatroom_id}`,
       );
     }
+  }
+
+  @SubscribeMessage('message')
+  async handleMessage(
+    @ConnectedSocket() client: CustomSocket,
+    @MessageBody() message: MessageEntity,
+  ) {
+    const user = await this.validateUser(client, message);
+    this.validateChatroom(user, message);
 
     if (client.messages.length < BATCH_SIZE) {
       client.messages.push(message);
     } else {
-      this.saveMessagesInTransaction(client.messages);
+      this.saveMessageBatch(client.messages);
       client.messages = [];
     }
 
     this.server.to(message.chatroom_id).emit('message', message);
   }
 
-  async saveMessagesInTransaction(messages: MessageEntity[]) {
+  async saveMessageBatch(messages: MessageEntity[]) {
     const queryRunner = this.entityManager.connection.createQueryRunner();
 
     await queryRunner.startTransaction();
