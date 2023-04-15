@@ -6,10 +6,7 @@ import { ChatroomEntity } from 'src/entities/chatroom.entity';
 import { UserEntity } from 'src/entities/user.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([ChatroomEntity]),
-    TypeOrmModule.forFeature([UserEntity]),
-  ],
+  imports: [TypeOrmModule.forFeature([UserEntity, ChatroomEntity])],
   providers: [ChatroomService],
   controllers: [ChatroomController],
 })

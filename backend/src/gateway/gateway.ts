@@ -1,3 +1,5 @@
+import { BadRequestException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
   MessageBody,
   OnGatewayConnection,
@@ -9,6 +11,8 @@ import {
 
 import { Server, Socket } from 'socket.io';
 import { MessageEntity } from 'src/entities/message.entity';
+import { UserEntity } from 'src/entities/user.entity';
+import { Repository } from 'typeorm';
 
 @WebSocketGateway({
   cors: {
@@ -16,6 +20,13 @@ import { MessageEntity } from 'src/entities/message.entity';
   },
 })
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(
+    @InjectRepository(MessageEntity)
+    private readonly messageRepository: Repository<MessageEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+  ) {}
+
   @WebSocketServer()
   server: Server;
 
@@ -40,7 +51,24 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('message')
-  handleMessage(@MessageBody() body: MessageEntity) {
-    this.server.to(body.chatroom_id).emit('message', body);
+  async handleMessage(@MessageBody() message: MessageEntity) {
+    const existingUser = await this.userRepository.findOne({
+      where: { id: message.sender_id },
+    });
+
+    if (!existingUser) {
+      throw new BadRequestException(`User doesn't exist ${message.sender_id}`);
+    }
+
+    const inChatroom = existingUser.chatrooms.some(
+      (c) => c.id === message.chatroom_id,
+    );
+    if (!inChatroom) {
+      throw new BadRequestException(
+        `User not in chatroom ${message.chatroom_id}`,
+      );
+    }
+    await this.messageRepository.save(message);
+    this.server.to(message.chatroom_id).emit('message', message);
   }
 }

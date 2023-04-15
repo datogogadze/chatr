@@ -90,10 +90,7 @@ const sendMessage = async () => {
     created_at: new Date(Date.now()),
   };
 
-  const saved = await messageStore.saveMessage(message);
-  if (saved) {
-    socket.emit('message', message);
-  }
+  socket.emit('message', message);
   newMessage.value = '';
 };
 

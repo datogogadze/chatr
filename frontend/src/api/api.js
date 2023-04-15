@@ -135,18 +135,6 @@ export async function getAllMessagesForChatroom(id) {
   }
 }
 
-export async function saveMessage(message) {
-  try {
-    const response = await api.post(`/api/message`, message);
-    return response.data;
-  } catch (error) {
-    console.log('Error in sendMessage', {
-      error: error.response.data,
-    });
-    return null;
-  }
-}
-
 export async function createChatroom(name) {
   try {
     const response = await api.post(`/api/chatroom`, { name });
