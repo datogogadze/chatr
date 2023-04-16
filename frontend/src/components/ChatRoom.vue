@@ -14,7 +14,16 @@
                 : 'room')
             }}
           </div>
-          <div class="card-body messages-container" ref="chatBox">
+          <div
+            class="card-body messages-container"
+            ref="chatBox"
+            @scroll="handleScroll"
+          >
+            <div v-if="messageStore.messages_loading" class="h-100">
+              <div class="spinner">
+                <div class="spinner-border text-primary" role="status"></div>
+              </div>
+            </div>
             <div v-for="message in messageStore.messages" :key="message.id">
               <p>
                 <strong
@@ -44,24 +53,18 @@
             </form>
           </div>
         </div>
-        <div class="card chatroom-card" style="text-align: center" v-else>
-          <h3 style="margin-top: 50px">Chatroom not connected</h3>
+        <div class="card chatroom-card" v-else>
+          <div class="h-100">
+            <h3 class="loading">Loading</h3>
+            <div class="spinner">
+              <div class="spinner-border text-primary" role="status"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<style>
-.messages-container::-webkit-scrollbar {
-  display: none;
-}
-
-.messages-container {
-  height: 600px;
-  overflow-y: auto;
-}
-</style>
 
 <script setup>
 import { useAuthStore } from '@/stores/auth.store';
@@ -78,6 +81,9 @@ const authStore = useAuthStore();
 
 const newMessage = ref('');
 const isSocketOpen = ref(false);
+const chatBox = ref(null);
+const inputBox = ref(null);
+let userHasScrolled = false;
 
 const sendMessage = async () => {
   if (!newMessage.value) return;
@@ -87,21 +93,34 @@ const sendMessage = async () => {
     sender_name: authStore.me.username,
     chatroom_id: chatroomStore.getSelectedRoomId,
     text: newMessage.value,
-    created_at: new Date(Date.now()),
+    created_at: new Date(),
   };
 
   socket.emit('message', message);
   newMessage.value = '';
 };
 
-const chatBox = ref(null);
-const inputBox = ref(null);
-
 const scrollToBottom = () => {
   if (!chatBox.value) return;
   chatBox.value.scrollTop = chatBox.value.scrollHeight;
   if (!inputBox.value) return;
   inputBox.value.focus();
+};
+
+const handleScroll = () => {
+  if (!chatBox.value) return;
+  const isAtTop = chatBox.value.scrollTop === 0;
+  if (
+    isAtTop &&
+    !messageStore.messages_loading &&
+    chatroomStore.getSelectedRoomId
+  ) {
+    userHasScrolled = true;
+    messageStore.fetchMessages(
+      chatroomStore.getSelectedRoomId,
+      messageStore.oldest_message_timestamp
+    );
+  }
 };
 
 watch(
@@ -115,7 +134,15 @@ watch(
 
         socket.emit('join', newVal.id);
 
-        await messageStore.fetchMessages(newVal.id);
+        messageStore.clear();
+        userHasScrolled = false;
+        messageStore.fetchMessages(
+          newVal.id,
+          messageStore.oldest_message_timestamp
+        );
+        setTimeout(() => {
+          scrollToBottom();
+        }, 1000);
       }
     } catch (error) {
       console.log('Error in chatroom watch', { error });
@@ -124,7 +151,9 @@ watch(
 );
 
 onUpdated(() => {
-  scrollToBottom();
+  if (!userHasScrolled) {
+    scrollToBottom();
+  }
 });
 
 onBeforeMount(() => {
@@ -146,6 +175,7 @@ onBeforeMount(() => {
   });
 
   socket.on('message', (message) => {
+    userHasScrolled = false;
     messageStore.pushMessage(message);
   });
 
@@ -171,15 +201,42 @@ onBeforeUnmount(() => {
   socket.close();
 });
 </script>
+
 <style>
+.messages-container::-webkit-scrollbar {
+  display: none;
+}
+
+.messages-container {
+  height: 600px;
+  overflow-y: auto;
+}
+
 .chatroom-card {
   width: 700px;
   height: 600px;
   box-shadow: 5px 5px 5px #888888;
+  position: relative;
 }
 
 .row > * {
   padding-left: 0;
   padding-right: 0;
+}
+
+.loading {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.spinner {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
 }
 </style>

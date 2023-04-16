@@ -127,9 +127,11 @@ export async function addUserToRoom(chatroomId) {
   }
 }
 
-export async function getAllMessagesForChatroom(id) {
+export async function getAllMessagesForChatroom(id, oldest_message_timestamp) {
   try {
-    const response = await api.get(`/api/message/chatroom/${id}`);
+    const response = await api.post(`/api/message/chatroom/${id}`, {
+      oldest_message_timestamp,
+    });
     return response.data;
   } catch (error) {
     console.log('Error in getAllMessagesForChatroom', {

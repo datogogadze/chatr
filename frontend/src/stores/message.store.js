@@ -3,7 +3,11 @@ import { defineStore } from 'pinia';
 
 export const useMessageStore = defineStore('message', {
   state: () => {
-    return { messages: [] };
+    return {
+      messages: [],
+      oldest_message_timestamp: null,
+      messages_loading: false,
+    };
   },
 
   getters: {
@@ -14,8 +18,17 @@ export const useMessageStore = defineStore('message', {
 
   actions: {
     async fetchMessages(chatroomId) {
-      const messages = await getAllMessagesForChatroom(chatroomId);
+      this.messages_loading = true;
+      const messages = await getAllMessagesForChatroom(
+        chatroomId,
+        this.oldest_message_timestamp
+      );
+      messages.push(...this.messages);
       this.messages = messages;
+      if (messages && messages.length > 0) {
+        this.oldest_message_timestamp = messages[0].created_at;
+      }
+      this.messages_loading = false;
     },
 
     async pushMessage(message) {
@@ -24,6 +37,8 @@ export const useMessageStore = defineStore('message', {
 
     clear() {
       this.messages = [];
+      this.oldest_message_timestamp = null;
+      this.messages_loading = false;
     },
   },
 });

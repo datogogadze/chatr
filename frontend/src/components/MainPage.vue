@@ -37,6 +37,14 @@
       </div>
     </div>
   </div>
+  <div class="main-page-error" v-else>
+    <div class="h-100">
+      <h3 class="loading">Loading</h3>
+      <div class="spinner">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -63,6 +71,9 @@ const showChatRoomList = ref(false);
 onBeforeMount(async () => {
   try {
     authenticated.value = await authStore.refreshAccessToken();
+    if (!authenticated.value) {
+      router.push('/login');
+    }
   } catch (error) {
     console.log('Error in main page onBeforeMount', { error });
   }
@@ -178,6 +189,28 @@ onBeforeMount(async () => {
   .top-navbar-toggle {
     display: none;
   }
+}
+
+.main-page-error {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.loading {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.spinner {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
 }
 
 html,

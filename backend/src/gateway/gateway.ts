@@ -24,7 +24,7 @@ import { CustomSocket, WsJwtGuard } from 'src/guards/ws.guard';
 import { EntityManager, Repository } from 'typeorm';
 import { Cache } from 'cache-manager';
 
-const BATCH_SIZE = 5;
+const BATCH_SIZE: number = 100;
 
 @WebSocketGateway({
   cors: {
