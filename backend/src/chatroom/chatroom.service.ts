@@ -1,22 +1,23 @@
 import {
   BadRequestException,
-  ForbiddenException,
+  CACHE_MANAGER,
+  Inject,
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ResponseDto } from 'src/dto/response.dto';
 import { ChatroomEntity } from 'src/entities/chatroom.entity';
 import { UserEntity } from 'src/entities/user.entity';
 import { Like, Repository } from 'typeorm';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class ChatroomService {
   constructor(
     @InjectRepository(ChatroomEntity)
     private readonly chatroomRepository: Repository<ChatroomEntity>,
-
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async getAllChatrooms(): Promise<ChatroomEntity[]> {
@@ -33,18 +34,27 @@ export class ChatroomService {
     });
   }
 
+  async getExistingUser(userId: string) {
+    let existingUser: UserEntity = await this.cacheManager.get(userId);
+
+    if (!existingUser) {
+      existingUser = await this.userRepository.findOne({
+        where: { id: userId },
+      });
+
+      if (!existingUser) {
+        throw new BadRequestException(`User ${userId} not found`);
+      }
+    }
+
+    return existingUser;
+  }
+
   async addUserToChatroom(
     userId: string,
     chatroomId: string,
   ): Promise<ChatroomEntity> {
-    const existingUser = await this.userRepository.findOne({
-      where: { id: userId },
-    });
-
-    if (!existingUser) {
-      throw new BadRequestException(`User ${userId} not found`);
-    }
-
+    const existingUser = await this.getExistingUser(userId);
     const existingChatroom = await this.chatroomRepository.findOne({
       where: { id: chatroomId },
     });
@@ -52,10 +62,12 @@ export class ChatroomService {
     if (!existingChatroom) {
       throw new BadRequestException(`Chatroom ${chatroomId} not found`);
     }
+    existingUser.chatrooms.push(existingChatroom);
+    this.cacheManager.set(userId, existingUser, 60000);
 
     await this.userRepository.save({
       id: userId,
-      chatrooms: [...existingUser.chatrooms, { id: chatroomId }],
+      chatrooms: existingUser.chatrooms,
     });
 
     return existingChatroom;
@@ -87,17 +99,13 @@ export class ChatroomService {
       throw new BadRequestException(`Wrong room id ${roomId}`);
     }
 
-    const existingUser = await this.userRepository.findOne({
-      where: { id: userId },
-    });
-
-    if (!existingUser) {
-      throw new BadRequestException(`Wrong user id ${userId}`);
-    }
+    const existingUser = await this.getExistingUser(userId);
 
     existingUser.chatrooms = existingUser.chatrooms.filter(
       (r) => r.id != roomId,
     );
+
+    this.cacheManager.set(userId, existingUser, 60000);
 
     await this.userRepository.save(existingUser);
 
