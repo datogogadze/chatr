@@ -1,4 +1,9 @@
-import { BadRequestException, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  CACHE_MANAGER,
+  Inject,
+  UseGuards,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   ConnectedSocket,
@@ -17,8 +22,9 @@ import { MessageEntity } from 'src/entities/message.entity';
 import { UserEntity } from 'src/entities/user.entity';
 import { CustomSocket, WsJwtGuard } from 'src/guards/ws.guard';
 import { EntityManager, Repository } from 'typeorm';
+import { Cache } from 'cache-manager';
 
-const BATCH_SIZE = 10;
+const BATCH_SIZE = 5;
 
 @WebSocketGateway({
   cors: {
@@ -33,6 +39,7 @@ export class AppGateway
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly entityManager: EntityManager,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   afterInit(client: CustomSocket) {
@@ -47,9 +54,6 @@ export class AppGateway
   }
 
   handleDisconnect(client: CustomSocket) {
-    if (client.messages.length > 0) {
-      this.saveMessageBatch(client.messages);
-    }
     console.log('Client disconnected: ', client.user.username);
   }
 
@@ -65,6 +69,24 @@ export class AppGateway
     client.leave(room);
   }
 
+  async getExistingUser(client: CustomSocket, message: MessageEntity) {
+    let existingUser: UserEntity = await this.cacheManager.get(client.user.sub);
+
+    if (!existingUser) {
+      existingUser = await this.userRepository.findOne({
+        where: { id: client.user.sub },
+      });
+
+      if (!existingUser) {
+        throw new BadRequestException(
+          `User doesn't exist ${message.sender_id}`,
+        );
+      }
+    }
+    this.cacheManager.set(client.user.sub, existingUser, 60000);
+    return existingUser;
+  }
+
   async validateUser(client: CustomSocket, message) {
     if (!client.user) {
       client.disconnect();
@@ -74,15 +96,7 @@ export class AppGateway
       throw new BadRequestException(`Incorrect sender ${message.sender_id}`);
     }
 
-    const existingUser = await this.userRepository.findOne({
-      where: { id: client.user.sub },
-    });
-
-    if (!existingUser) {
-      throw new BadRequestException(`User doesn't exist ${message.sender_id}`);
-    }
-
-    return existingUser;
+    return await this.getExistingUser(client, message);
   }
 
   async validateChatroom(user, message) {
@@ -102,15 +116,30 @@ export class AppGateway
   ) {
     const user = await this.validateUser(client, message);
     this.validateChatroom(user, message);
+    this.handleCacheing(message);
+    this.server.to(message.chatroom_id).emit('message', message);
+  }
 
-    if (client.messages.length < BATCH_SIZE) {
-      client.messages.push(message);
-    } else {
-      this.saveMessageBatch(client.messages);
-      client.messages = [];
+  async handleCacheing(message: MessageEntity) {
+    let cached_messages: MessageEntity[] = await this.cacheManager.get(
+      message.chatroom_id,
+    );
+
+    if (!cached_messages) {
+      cached_messages = [];
     }
 
-    this.server.to(message.chatroom_id).emit('message', message);
+    cached_messages.push(message);
+
+    if (cached_messages.length >= BATCH_SIZE) {
+      try {
+        await this.saveMessageBatch(cached_messages);
+        cached_messages = [];
+      } catch (error) {
+        console.log('Error while saving batch', error);
+      }
+    }
+    this.cacheManager.set(message.chatroom_id, cached_messages, 0);
   }
 
   async saveMessageBatch(messages: MessageEntity[]) {

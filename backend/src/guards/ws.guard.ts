@@ -30,7 +30,6 @@ export class WsJwtGuard implements CanActivate {
     }
     const payload = verify(token, process.env.JWT_ACCESS_TOKEN_SECRET);
     client.user = payload;
-    client.messages = [];
     return payload;
   }
 }

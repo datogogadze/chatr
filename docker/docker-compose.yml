@@ -1,23 +1,5 @@
 version: '3.8'
 services:
-  frontend:
-    container_name: speakr-frontend
-    image: speakr-frontend:latest
-    build: ../frontend
-    ports:
-      - '8081:8080'
-    env_file:
-      - .env.frontend
-
-  backend:
-    container_name: speakr-backend
-    image: speakr-backend:latest
-    build: ../backend
-    ports:
-      - '3001:3000'
-    env_file:
-      - .env.backend
-
   db:
     container_name: speakr-db
     image: postgres:14.1-alpine
@@ -30,6 +12,38 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
 
+  redis:
+    container_name: speakr-redis
+    image: redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+
+  backend:
+    container_name: speakr-backend
+    image: speakr-backend:latest
+    build: ../backend
+    ports:
+      - '3001:3000'
+    env_file:
+      - .env.backend
+    depends_on:
+      - db
+      - redis
+
+  frontend:
+    container_name: speakr-frontend
+    image: speakr-frontend:latest
+    build: ../frontend
+    ports:
+      - '8081:8080'
+    env_file:
+      - .env.frontend
+    depends_on:
+      - backend
+
 volumes:
   db:
     driver: local
+  redis-data:

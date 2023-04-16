@@ -86,10 +86,13 @@ async function register() {
 }
 
 onBeforeMount(async () => {
-  await authStore.refreshAccessToken();
-  if (authStore.me) {
-    router.push('/home');
-    return;
+  try {
+    if ((await authStore.refreshAccessToken()) && authStore.me) {
+      router.push('/home');
+      return;
+    }
+  } catch (error) {
+    console.log('Error in registration page onBeforeMount', { error });
   }
 });
 </script>

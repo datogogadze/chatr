@@ -73,9 +73,13 @@ async function login() {
 }
 
 onBeforeMount(async () => {
-  if ((await authStore.refreshAccessToken()) && authStore.me) {
-    router.push('/home');
-    return;
+  try {
+    if ((await authStore.refreshAccessToken()) && authStore.me) {
+      router.push('/home');
+      return;
+    }
+  } catch (error) {
+    console.log('Error in login page onBeforeMount', { error });
   }
 });
 </script>
