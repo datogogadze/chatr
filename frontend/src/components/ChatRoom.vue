@@ -24,17 +24,48 @@
                 <div class="spinner-border text-primary" role="status"></div>
               </div>
             </div>
-            <div v-for="message in messageStore.messages" :key="message.id">
-              <p>
-                <strong
-                  >{{
-                    message.sender_name === authStore?.me.username
-                      ? 'me'
-                      : message.sender_name
-                  }}:</strong
-                >
-                {{ message.text }}
-              </p>
+            <div v-for="(value, key) in messageStore.messages" :key="key">
+              <div class="day" v-if="value.length > 0">
+                {{ getDayStart(value[0].created_at) }}
+              </div>
+              <div
+                v-for="(message, index) in value"
+                :key="message.id"
+                v-bind:class="
+                  authStore.me.id === message.sender_id
+                    ? 'right-message'
+                    : 'left-message'
+                "
+              >
+                <div class="message-content">
+                  <div
+                    v-bind:class="
+                      authStore.me.id === message.sender_id
+                        ? 'left-tooltip'
+                        : 'right-tooltip'
+                    "
+                  >
+                    {{ getFullDate(message.created_at) }}
+                  </div>
+
+                  <div
+                    v-if="shouldShowName(message, value[index - 1], index)"
+                    class="sender"
+                  >
+                    {{ message.sender_name }}
+                  </div>
+                  <div
+                    class="sent-text"
+                    v-bind:class="
+                      authStore.me.id === message.sender_id
+                        ? 'blue-text'
+                        : 'grey-text'
+                    "
+                  >
+                    {{ message.text }}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="card-footer d-flex">
@@ -121,6 +152,39 @@ const handleScroll = () => {
       messageStore.oldest_message_timestamp
     );
   }
+};
+
+const getFullDate = (created_at) => {
+  const date = new Date(created_at);
+  const options = {
+    weekday: 'short',
+    hour: 'numeric',
+    minute: 'numeric',
+  };
+  return date.toLocaleString('en-US', options);
+};
+
+const getDayStart = (created_at) => {
+  const date = new Date(created_at);
+  const options = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  };
+  return date.toLocaleDateString('en-US', options);
+};
+
+const shouldShowName = (message, prev, index) => {
+  return (
+    message.sender_name !== authStore?.me.username &&
+    (index === 0 ||
+      prev.sender_name != message.sender_name ||
+      new Date(message.created_at).getTime() -
+        new Date(prev.created_at).getTime() >
+        60000)
+  );
 };
 
 watch(
@@ -238,5 +302,95 @@ onBeforeUnmount(() => {
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
+}
+
+.day {
+  text-align: center;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  font-size: 12px;
+  color: grey;
+}
+
+.left-message {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.right-message {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.message-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-width: 60%;
+}
+
+.message-content:hover .right-tooltip {
+  opacity: 1;
+}
+
+.message-content:hover .left-tooltip {
+  opacity: 1;
+}
+
+.right-tooltip {
+  position: absolute;
+  pointer-events: none;
+  bottom: 12px;
+  left: calc(100% + 15px);
+  width: 85px;
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  border-radius: 5px;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  font-size: 12px;
+}
+
+.left-tooltip {
+  position: absolute;
+  pointer-events: none;
+  bottom: 12px;
+  right: calc(100% + 15px);
+  width: 85px;
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  border-radius: 5px;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  font-size: 12px;
+}
+
+.sender {
+  font-size: 12px;
+  color: grey;
+  margin-left: 10px;
+  margin-top: 10px;
+}
+
+.grey-text {
+  background-color: #e4e6eb;
+  color: black;
+}
+
+.blue-text {
+  background-color: #0086fd;
+  color: white;
+}
+
+.sent-text {
+  border-radius: 20px;
+  padding: 10px 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 1px;
+  font-size: 16px;
 }
 </style>

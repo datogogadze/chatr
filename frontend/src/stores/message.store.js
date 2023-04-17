@@ -4,7 +4,7 @@ import { defineStore } from 'pinia';
 export const useMessageStore = defineStore('message', {
   state: () => {
     return {
-      messages: [],
+      messages: {},
       oldest_message_timestamp: null,
       messages_loading: false,
     };
@@ -23,20 +23,31 @@ export const useMessageStore = defineStore('message', {
         chatroomId,
         this.oldest_message_timestamp
       );
-      messages.push(...this.messages);
-      this.messages = messages;
+
       if (messages && messages.length > 0) {
         this.oldest_message_timestamp = messages[0].created_at;
       }
+
+      messages.forEach((message) => {
+        let day = new Date(message.created_at).toDateString();
+        if (!this.messages[day]) {
+          this.messages[day] = [];
+        }
+        this.messages[day].push(message);
+      });
       this.messages_loading = false;
     },
 
     async pushMessage(message) {
-      this.messages.push(message);
+      let day = new Date(message.created_at).toDateString();
+      if (!this.messages[day]) {
+        this.messages[day] = [];
+      }
+      this.messages[day].push(message);
     },
 
     clear() {
-      this.messages = [];
+      this.messages = {};
       this.oldest_message_timestamp = null;
       this.messages_loading = false;
     },
