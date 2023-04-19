@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="row mt-5">
+    <div class="row">
       <div class="col">
         <div class="card chatroom-list-card">
           <div>
@@ -11,9 +11,7 @@
               <button
                 type="button"
                 class="list-group-item list-group-item-action chatroom-name"
-                v-bind:class="
-                  room.id == chatroomStore.getSelectedRoomId ? 'active' : ''
-                "
+                :class="{ active: room.id == chatroomStore.getSelectedRoomId }"
                 v-for="room in chatroomStore.chatrooms"
                 :key="room.id"
                 @click="() => chatroomStore.selectRoom(room)"

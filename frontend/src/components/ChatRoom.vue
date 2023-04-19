@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="row mt-5">
+    <div class="row">
       <div class="col">
         <div
           class="card chatroom-card"
@@ -24,14 +24,14 @@
                 <div class="spinner-border text-primary" role="status"></div>
               </div>
             </div>
-            <div v-for="(value, key) in messageStore.messages" :key="key">
+            <div v-for="[key, value] in messageStore.messages" :key="key">
               <div class="day" v-if="value.length > 0">
                 {{ getDayStart(value[0].created_at) }}
               </div>
               <div
                 v-for="(message, index) in value"
                 :key="message.id"
-                v-bind:class="
+                :class="
                   authStore.me.id === message.sender_id
                     ? 'right-message'
                     : 'left-message'
@@ -39,7 +39,7 @@
               >
                 <div class="message-content">
                   <div
-                    v-bind:class="
+                    :class="
                       authStore.me.id === message.sender_id
                         ? 'left-tooltip'
                         : 'right-tooltip'
@@ -56,7 +56,7 @@
                   </div>
                   <div
                     class="sent-text"
-                    v-bind:class="
+                    :class="
                       authStore.me.id === message.sender_id
                         ? 'blue-text'
                         : 'grey-text'
@@ -69,19 +69,46 @@
             </div>
           </div>
           <div class="card-footer d-flex">
-            <form class="w-100" @submit.prevent="sendMessage">
+            <div class="w-100">
               <div class="form-group d-flex align-items-center">
                 <input
-                  style="margin-right: 10px"
+                  @keypress.enter="sendMessage"
                   type="text"
                   class="form-control flex-grow-1"
                   placeholder="Type your message here..."
                   v-model="newMessage"
                   ref="inputBox"
                 />
-                <button type="submit" class="btn btn-primary">Send</button>
+                <button
+                  ref="pickerButton"
+                  class="btn btn-light border-0 shadow-sm"
+                  style="margin-left: 10px"
+                  @click="showPicker = !showPicker"
+                >
+                  <i class="bi bi-emoji-smile"></i>
+                </button>
+                <div ref="picker" v-if="showPicker">
+                  <Picker
+                    class="emojies"
+                    :data="emojiIndex"
+                    :showPreview="false"
+                    set="twitter"
+                    @select="showEmoji"
+                    title="Select emoji"
+                    emoji="smile"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  style="margin-left: 5px"
+                  @click="sendMessage"
+                >
+                  Send
+                </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
         <div class="card chatroom-card" v-else>
@@ -101,9 +128,21 @@
 import { useAuthStore } from '@/stores/auth.store';
 import { useChatRoomStore } from '@/stores/chatroom.store';
 import { useMessageStore } from '@/stores/message.store';
-import { ref, watch, onBeforeUnmount, onBeforeMount, onUpdated } from 'vue';
+import {
+  ref,
+  watch,
+  onBeforeUnmount,
+  onBeforeMount,
+  onUpdated,
+  onMounted,
+} from 'vue';
 import { io } from 'socket.io-client';
 
+import data from 'emoji-mart-vue-fast/data/twitter.json';
+import 'emoji-mart-vue-fast/css/emoji-mart.css';
+import { Picker, EmojiIndex } from 'emoji-mart-vue-fast/src';
+let emojiIndex = new EmojiIndex(data);
+/* eslint-disable */
 let socket = null;
 
 const chatroomStore = useChatRoomStore();
@@ -114,21 +153,43 @@ const newMessage = ref('');
 const isSocketOpen = ref(false);
 const chatBox = ref(null);
 const inputBox = ref(null);
+const showPicker = ref(false);
+const picker = ref(null);
+const pickerButton = ref(null);
 let userHasScrolled = false;
+const saveScroll = ref(0);
+
+const showEmoji = (emoji) => {
+  newMessage.value += emoji.native;
+};
 
 const sendMessage = async () => {
   if (!newMessage.value) return;
+
+  newMessage.value = newMessage.value.substring(0, 256);
+  const words = newMessage.value.split(' ');
+  let messageText = '';
+  words.forEach((w) => {
+    if (emojiIndex._emoticons[w]) {
+      messageText += emojiIndex.findEmoji(
+        `:${emojiIndex._emoticons[w]}:`
+      ).native;
+    } else {
+      messageText += w;
+    }
+  });
 
   const message = {
     sender_id: authStore.me.id,
     sender_name: authStore.me.username,
     chatroom_id: chatroomStore.getSelectedRoomId,
-    text: newMessage.value,
+    text: messageText,
     created_at: new Date(),
   };
 
   socket.emit('message', message);
   newMessage.value = '';
+  showPicker.value = false;
 };
 
 const scrollToBottom = () => {
@@ -147,6 +208,12 @@ const handleScroll = () => {
     chatroomStore.getSelectedRoomId
   ) {
     userHasScrolled = true;
+
+    // if (chatBox.value.scrollHeight - saveScroll.value < 100)
+    if (chatBox.value.scrollHeight - saveScroll.value < 100) {
+      return;
+    }
+    saveScroll.value = chatBox.value.scrollHeight;
     messageStore.fetchMessages(
       chatroomStore.getSelectedRoomId,
       messageStore.oldest_message_timestamp
@@ -217,7 +284,29 @@ watch(
 onUpdated(() => {
   if (!userHasScrolled) {
     scrollToBottom();
+  } else if (chatBox.value) {
+    chatBox.value.scrollTop = chatBox.value.scrollHeight - saveScroll.value;
   }
+});
+
+onMounted(() => {
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      showPicker.value = false;
+    }
+  });
+
+  window.addEventListener('click', (event) => {
+    if (showPicker.value) {
+      const pickerClicked = pickerButton.value.contains(event.target);
+      if (pickerClicked) return;
+
+      const clikcedInsidePicker = picker.value.contains(event.target);
+      if (!clikcedInsidePicker) {
+        showPicker.value = false;
+      }
+    }
+  });
 });
 
 onBeforeMount(() => {
@@ -392,5 +481,21 @@ onBeforeUnmount(() => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   margin-bottom: 1px;
   font-size: 16px;
+}
+
+.emojies {
+  width: 300px !important;
+  height: 350px;
+  position: absolute;
+  right: 10px;
+  bottom: 60px;
+}
+
+@media only screen and (max-width: 550px) {
+  .emojies {
+    width: 270px !important;
+    height: 300px;
+    right: 0px;
+  }
 }
 </style>

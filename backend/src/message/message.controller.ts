@@ -13,7 +13,9 @@ export class MessageController {
   ): Promise<MessageEntity[]> {
     return this.messageService.getAllMessagesForChatroom(
       id,
-      body.oldest_message_timestamp,
+      body.oldest_message_timestamp
+        ? new Date(body.oldest_message_timestamp)
+        : new Date(),
     );
   }
 }
