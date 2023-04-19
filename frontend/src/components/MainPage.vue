@@ -6,6 +6,7 @@
           <div style="display: flex">
             <a class="navbar-brand" href="#">Speakr</a>
             <button
+              ref="showChatRoomListButton"
               class="navbar-toggler top-navbar-toggle"
               type="button"
               @click="showChatRoomList = !showChatRoomList"
@@ -27,8 +28,12 @@
           </div>
         </div>
       </nav>
-      <div class="main-page-body">
-        <div class="chatroom-list" :class="{ visible: showChatRoomList }">
+      <div class="main-page-body mt-5">
+        <div
+          ref="chatroomList"
+          class="chatroom-list"
+          :class="{ visible: showChatRoomList }"
+        >
           <ChatRoomList />
         </div>
         <div class="chatroom">
@@ -50,13 +55,14 @@
 <script setup>
 import ChatRoomList from './ChatRoomList.vue';
 import ChatRoom from './ChatRoom.vue';
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, onMounted, ref } from 'vue';
 import { useAuthStore } from '@/stores/auth.store';
 import router from '@/router';
 import { useMessageStore } from '@/stores/message.store';
 import { useChatRoomStore } from '@/stores/chatroom.store';
 
 const authStore = useAuthStore();
+const showChatRoomListButton = ref(null);
 
 async function logout() {
   useChatRoomStore().clear();
@@ -67,6 +73,27 @@ async function logout() {
 
 const authenticated = ref(false);
 const showChatRoomList = ref(false);
+const chatroomList = ref(null);
+
+onMounted(() => {
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      showChatRoomList.value = false;
+    }
+  });
+
+  window.addEventListener('click', (event) => {
+    if (showChatRoomList.value) {
+      const showClicked = showChatRoomListButton.value.contains(event.target);
+      if (showClicked) return;
+
+      const clikcedInsideList = chatroomList.value.contains(event.target);
+      if (!clikcedInsideList) {
+        showChatRoomList.value = false;
+      }
+    }
+  });
+});
 
 onBeforeMount(async () => {
   try {
@@ -120,7 +147,7 @@ onBeforeMount(async () => {
   }
 
   .chatroom-list-card {
-    width: 250px;
+    width: 270px;
   }
 
   .top-navbar {
@@ -135,7 +162,7 @@ onBeforeMount(async () => {
     top: 0;
     left: 0;
     bottom: 0;
-    width: 250px;
+    width: 270px;
     background-color: transparent;
     transform: translateX(-100%);
     transition: transform 0.1s ease-out, visibility 0s linear 0.1s;
@@ -167,15 +194,15 @@ onBeforeMount(async () => {
 
 @media only screen and (max-width: 550px) {
   .main-page-body {
-    width: 250px;
+    width: 270px;
   }
 
   .top-navbar {
-    width: 250px;
+    width: 270px;
   }
 
   .chatroom-card {
-    width: 250px;
+    width: 270px;
   }
 }
 

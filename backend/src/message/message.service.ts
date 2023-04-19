@@ -40,7 +40,7 @@ export class MessageService {
       !cached_messages ||
       (oldest_message_timestamp &&
         new Date(cached_messages[0].created_at).getTime() >=
-          new Date(oldest_message_timestamp).getTime())
+          oldest_message_timestamp.getTime())
     ) {
       cached_messages = [];
     }
@@ -56,18 +56,18 @@ export class MessageService {
 
     const FILL_BATCH: number = BATCH_SIZE - cached_messages.length;
 
-    const saved_messages: MessageEntity[] = await this.messageRepository.find({
+    let saved_messages: MessageEntity[] = await this.messageRepository.find({
       where: {
         chatroom_id: id,
-        created_at: LessThan(
-          oldest_message_timestamp ? oldest_message_timestamp : new Date(),
-        ),
+        created_at: LessThan(oldest_message_timestamp),
       },
       order: {
-        created_at: 'ASC',
+        created_at: 'DESC',
       },
       take: FILL_BATCH,
     });
+
+    saved_messages = saved_messages.reverse();
 
     saved_messages.push(...cached_messages);
     return saved_messages;
