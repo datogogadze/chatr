@@ -24,13 +24,20 @@
                 <div class="spinner-border text-primary" role="status"></div>
               </div>
             </div>
-            <div v-for="[key, value] in messageStore.messages" :key="key">
-              <div class="day" v-if="value.length > 0">
-                {{ getDayStart(value[0].created_at) }}
+            <div
+              v-for="(message, index) in messageStore.messages"
+              :key="message.id"
+            >
+              <div
+                class="day"
+                v-if="
+                  index === 0 ||
+                  shouldShowDate(message, messageStore.messages[index - 1])
+                "
+              >
+                {{ getDayStart(message.created_at) }}
               </div>
               <div
-                v-for="(message, index) in value"
-                :key="message.id"
                 :class="
                   authStore.me.id === message.sender_id
                     ? 'right-message'
@@ -40,7 +47,7 @@
                 <div class="message-content">
                   <div
                     :class="
-                      authStore.me.id === message.sender_id
+                      authStore?.me.id === message.sender_id
                         ? 'left-tooltip'
                         : 'right-tooltip'
                     "
@@ -49,7 +56,12 @@
                   </div>
 
                   <div
-                    v-if="shouldShowName(message, value[index - 1], index)"
+                    v-if="
+                      shouldShowName(
+                        message,
+                        index === 0 ? null : messageStore.messages[index - 1]
+                      )
+                    "
                     class="sender"
                   >
                     {{ message.sender_name }}
@@ -112,11 +124,14 @@
           </div>
         </div>
         <div class="card chatroom-card" v-else>
-          <div class="h-100">
+          <div v-if="chatroomStore.getSelectedRoomId" class="h-100">
             <h3 class="loading">Loading</h3>
             <div class="spinner">
               <div class="spinner-border text-primary" role="status"></div>
             </div>
+          </div>
+          <div v-else class="h-100">
+            <h3 class="loading">Select a chatroom</h3>
           </div>
         </div>
       </div>
@@ -142,7 +157,6 @@ import data from 'emoji-mart-vue-fast/data/twitter.json';
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
 import { Picker, EmojiIndex } from 'emoji-mart-vue-fast/src';
 let emojiIndex = new EmojiIndex(data);
-/* eslint-disable */
 let socket = null;
 
 const chatroomStore = useChatRoomStore();
@@ -243,10 +257,17 @@ const getDayStart = (created_at) => {
   return date.toLocaleDateString('en-US', options);
 };
 
-const shouldShowName = (message, prev, index) => {
+const shouldShowDate = (message, prev) => {
+  return (
+    new Date(message.created_at).getDate() !==
+    new Date(prev.created_at).getDate()
+  );
+};
+
+const shouldShowName = (message, prev) => {
   return (
     message.sender_name !== authStore?.me.username &&
-    (index === 0 ||
+    (prev == null ||
       prev.sender_name != message.sender_name ||
       new Date(message.created_at).getTime() -
         new Date(prev.created_at).getTime() >
