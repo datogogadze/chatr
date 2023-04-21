@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ChatroomEntity } from './chatroom.entity';
+import { BigIntTransformer } from 'src/utils/transformers';
 
 @Entity('messages')
 export class MessageEntity {
@@ -24,11 +25,11 @@ export class MessageEntity {
   @Column()
   public chatroom_id: string;
 
-  @Column()
-  public created_at: Date;
+  @Column({ type: 'bigint', transformer: new BigIntTransformer() })
+  public created_at: number;
 
-  @Column()
-  public updated_at: Date;
+  @Column({ type: 'bigint', transformer: new BigIntTransformer() })
+  public updated_at: number;
 
   @ManyToOne(() => ChatroomEntity, (chatroom) => chatroom.messages)
   @JoinColumn({ name: 'chatroom_id' })

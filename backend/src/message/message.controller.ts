@@ -14,8 +14,8 @@ export class MessageController {
     return this.messageService.getAllMessagesForChatroom(
       id,
       body.oldest_message_timestamp
-        ? new Date(body.oldest_message_timestamp)
-        : new Date(),
+        ? body.oldest_message_timestamp
+        : new Date().getTime(),
     );
   }
 }

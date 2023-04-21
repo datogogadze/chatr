@@ -35,7 +35,7 @@
                   shouldShowDate(message, messageStore.messages[index - 1])
                 "
               >
-                {{ getDayStart(message.created_at) }}
+                {{ getDayTime(message.created_at) }}
               </div>
               <div
                 :class="
@@ -52,7 +52,7 @@
                         : 'right-tooltip'
                     "
                   >
-                    {{ getFullDate(message.created_at) }}
+                    {{ getMessageTime(message.created_at) }}
                   </div>
 
                   <div
@@ -198,7 +198,7 @@ const sendMessage = async () => {
     sender_name: authStore.me.username,
     chatroom_id: chatroomStore.getSelectedRoomId,
     text: messageText,
-    created_at: new Date(),
+    created_at: new Date().getTime(),
   };
 
   socket.emit('message', message);
@@ -235,17 +235,18 @@ const handleScroll = () => {
   }
 };
 
-const getFullDate = (created_at) => {
+const getMessageTime = (created_at) => {
   const date = new Date(created_at);
   const options = {
     weekday: 'short',
-    hour: 'numeric',
-    minute: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
   };
-  return date.toLocaleString('en-US', options);
+  return date.toLocaleString('en-GB', options);
 };
 
-const getDayStart = (created_at) => {
+const getDayTime = (created_at) => {
   const date = new Date(created_at);
   const options = {
     year: 'numeric',
@@ -253,8 +254,9 @@ const getDayStart = (created_at) => {
     day: 'numeric',
     hour: 'numeric',
     minute: 'numeric',
+    hour12: false,
   };
-  return date.toLocaleDateString('en-US', options);
+  return date.toLocaleDateString('en-GB', options);
 };
 
 const shouldShowDate = (message, prev) => {
@@ -450,11 +452,12 @@ onBeforeUnmount(() => {
 }
 
 .right-tooltip {
+  text-align: center;
   position: absolute;
   pointer-events: none;
   bottom: 12px;
   left: calc(100% + 15px);
-  width: 85px;
+  width: 60px;
   background-color: #333;
   color: #fff;
   padding: 5px;
@@ -465,11 +468,12 @@ onBeforeUnmount(() => {
 }
 
 .left-tooltip {
+  text-align: center;
   position: absolute;
   pointer-events: none;
   bottom: 12px;
   right: calc(100% + 15px);
-  width: 85px;
+  width: 60px;
   background-color: #333;
   color: #fff;
   padding: 5px;

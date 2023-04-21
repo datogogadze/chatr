@@ -11,8 +11,8 @@ export class usersTable1679415015713 implements MigrationInterface {
               email VARCHAR (256) NOT NULL UNIQUE,
               password VARCHAR (256) NOT NULL,
               refresh_token VARCHAR (256),
-              created_at TIMESTAMP DEFAULT NOW(),
-              updated_at TIMESTAMP DEFAULT NOW()
+              created_at BIGINT DEFAULT extract(epoch from now()) * 1000,
+              updated_at BIGINT DEFAULT extract(epoch from now()) * 1000
           );`,
     );
   }

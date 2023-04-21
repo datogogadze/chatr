@@ -32,7 +32,6 @@ export const useMessageStore = defineStore('message', {
       this.oldest_message_timestamp = messages[0].created_at;
 
       this.messages = [...messages, ...this.messages];
-
       this.messages_loading = false;
     },
 
