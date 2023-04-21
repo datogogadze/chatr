@@ -51,9 +51,6 @@ export class MessageService {
     }
 
     const FILL_BATCH: number = BATCH_SIZE - cached_messages.length;
-
-    console.log({ oldest_message_timestamp });
-
     let saved_messages: MessageEntity[] = await this.messageRepository.find({
       where: {
         chatroom_id: id,
