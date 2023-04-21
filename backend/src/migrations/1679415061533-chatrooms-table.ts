@@ -10,8 +10,8 @@ export class chatroomsTable1679415061533 implements MigrationInterface {
               name VARCHAR (64) NOT NULL UNIQUE,
               description VARCHAR (256),
               creator_id UUID NOT NULL,
-              created_at TIMESTAMP DEFAULT NOW(),
-              updated_at TIMESTAMP DEFAULT NOW(),
+              created_at BIGINT DEFAULT extract(epoch from now()) * 1000,
+              updated_at BIGINT DEFAULT extract(epoch from now()) * 1000,
               CONSTRAINT fk_chatroom_user
                   FOREIGN KEY(creator_id) 
                       REFERENCES users(id)

@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChatroomEntity } from 'src/entities/chatroom.entity';
 import { MessageEntity } from 'src/entities/message.entity';
-import { LessThan, Repository } from 'typeorm';
+import { LessThan, MoreThan, Repository } from 'typeorm';
 import { Cache } from 'cache-manager';
 
 const BATCH_SIZE: number = 100;
@@ -24,7 +24,7 @@ export class MessageService {
 
   async getAllMessagesForChatroom(
     id: string,
-    oldest_message_timestamp: Date,
+    oldest_message_timestamp: number,
   ): Promise<MessageEntity[]> {
     const existingChatroom = await this.chatroomRepository.findOne({
       where: { id },
@@ -38,23 +38,21 @@ export class MessageService {
 
     if (
       !cached_messages ||
-      (oldest_message_timestamp &&
-        new Date(cached_messages[0].created_at).getTime() >=
-          oldest_message_timestamp.getTime())
+      cached_messages.length === 0 ||
+      cached_messages[0].created_at >= oldest_message_timestamp
     ) {
       cached_messages = [];
     }
 
-    cached_messages.sort(
-      (a, b) =>
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-    );
+    cached_messages.sort((a, b) => a.created_at - b.created_at);
 
     if (cached_messages.length >= BATCH_SIZE) {
       return cached_messages;
     }
 
     const FILL_BATCH: number = BATCH_SIZE - cached_messages.length;
+
+    console.log({ oldest_message_timestamp });
 
     let saved_messages: MessageEntity[] = await this.messageRepository.find({
       where: {
@@ -70,6 +68,7 @@ export class MessageService {
     saved_messages = saved_messages.reverse();
 
     saved_messages.push(...cached_messages);
+
     return saved_messages;
   }
 }

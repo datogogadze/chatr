@@ -11,8 +11,8 @@ export class messagesTable1679415103414 implements MigrationInterface {
               sender_id UUID NOT NULL,
               sender_name VARCHAR(32) NOT NULL,
               chatroom_id UUID NOT NULL,
-              created_at TIMESTAMP DEFAULT NOW(),
-              updated_at TIMESTAMP DEFAULT NOW(),
+              created_at BIGINT DEFAULT extract(epoch from now()) * 1000,
+              updated_at BIGINT DEFAULT extract(epoch from now()) * 1000,
               CONSTRAINT fk_message_chatroom
                   FOREIGN KEY(chatroom_id) 
                       REFERENCES chatrooms(id)

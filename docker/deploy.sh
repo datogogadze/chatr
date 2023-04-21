@@ -4,4 +4,4 @@ echo y | docker rm speakr-frontend
 echo y | docker rm speakr-backend
 docker rmi speakr-frontend
 docker rmi speakr-backend
-docker-compose up
+docker-compose up backend frontend
