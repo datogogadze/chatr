@@ -4,7 +4,7 @@
       <nav class="navbar navbar-light bg-light top-navbar mt-3">
         <div class="container-fluid">
           <div style="display: flex">
-            <a class="navbar-brand" href="#">Speakr</a>
+            <a class="navbar-brand" href="#">Chatr</a>
             <button
               ref="showChatRoomListButton"
               class="navbar-toggler top-navbar-toggle"

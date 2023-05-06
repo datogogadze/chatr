@@ -103,7 +103,6 @@
                   <Picker
                     class="emojies"
                     :data="emojiIndex"
-                    :showPreview="false"
                     set="twitter"
                     @select="showEmoji"
                     title="Select emoji"
@@ -171,6 +170,7 @@ const showPicker = ref(false);
 const picker = ref(null);
 const pickerButton = ref(null);
 let userHasScrolled = false;
+let userInputChange = false;
 const saveScroll = ref(0);
 
 const showEmoji = (emoji) => {
@@ -277,6 +277,10 @@ const shouldShowName = (message, prev) => {
   );
 };
 
+watch(newMessage, () => {
+  userInputChange = true;
+});
+
 watch(
   () => chatroomStore.selectedRoom,
   async (newVal, oldVal) => {
@@ -294,9 +298,6 @@ watch(
           newVal.id,
           messageStore.oldest_message_timestamp
         );
-        setTimeout(() => {
-          scrollToBottom();
-        }, 1000);
       }
     } catch (error) {
       console.log('Error in chatroom watch', { error });
@@ -305,11 +306,15 @@ watch(
 );
 
 onUpdated(() => {
-  if (!userHasScrolled) {
-    scrollToBottom();
-  } else if (chatBox.value) {
-    chatBox.value.scrollTop = chatBox.value.scrollHeight - saveScroll.value;
+  if (userInputChange) {
+    userInputChange = false;
+    return;
   }
+  if (chatBox.value && userHasScrolled) {
+    chatBox.value.scrollTop = chatBox.value.scrollHeight - saveScroll.value;
+    return;
+  }
+  scrollToBottom();
 });
 
 onMounted(() => {
@@ -510,7 +515,7 @@ onBeforeUnmount(() => {
 
 .emojies {
   width: 300px !important;
-  height: 350px;
+  height: 400px !important;
   position: absolute;
   right: 10px;
   bottom: 60px;
@@ -519,7 +524,7 @@ onBeforeUnmount(() => {
 @media only screen and (max-width: 550px) {
   .emojies {
     width: 270px !important;
-    height: 300px;
+    height: 300px !important;
     right: 0px;
   }
 }
