@@ -1,0 +1,24 @@
+{
+  "name": "chatr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start:backend": "npm start --prefix ./backend",
+    "start:frontend": "npm start --prefix ./frontend",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/datogogadze/chatr.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/datogogadze/chatr/issues"
+  },
+  "homepage": "https://github.com/datogogadze/chatr#readme",
+  "dependencies": {
+    "concurrently": "^7.6.0"
+  }
+}
