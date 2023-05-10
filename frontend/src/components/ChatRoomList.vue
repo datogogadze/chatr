@@ -207,7 +207,7 @@ const joinRoom = async (roomId) => {
 };
 
 const isNotJoined = (roomId) => {
-  const hasRoom = authStore?.me.chatrooms.find((r) => r.id === roomId);
+  const hasRoom = chatroomStore.chatrooms.find((r) => r.id === roomId);
   if (hasRoom) {
     return false;
   }

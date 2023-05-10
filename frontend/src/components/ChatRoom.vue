@@ -189,7 +189,7 @@ const sendMessage = async () => {
         `:${emojiIndex._emoticons[w]}:`
       ).native;
     } else {
-      messageText += w;
+      messageText += w + ' ';
     }
   });
 
