@@ -99,7 +99,7 @@ export class AppGateway
     return await this.getExistingUser(client, message);
   }
 
-  async validateChatroom(user, message) {
+  validateChatroom(user, message) {
     const inChatroom = user.chatrooms.some((c) => c.id === message.chatroom_id);
 
     if (!inChatroom) {
@@ -114,10 +114,14 @@ export class AppGateway
     @ConnectedSocket() client: CustomSocket,
     @MessageBody() message: MessageEntity,
   ) {
-    const user = await this.validateUser(client, message);
-    this.validateChatroom(user, message);
-    this.handleCacheing(message);
-    this.server.to(message.chatroom_id).emit('message', message);
+    try {
+      const user = await this.validateUser(client, message);
+      this.validateChatroom(user, message);
+      this.handleCacheing(message);
+      this.server.to(message.chatroom_id).emit('message', message);
+    } catch (error) {
+      console.log('Error in handleMessage', error.message);
+    }
   }
 
   async handleCacheing(message: MessageEntity) {
