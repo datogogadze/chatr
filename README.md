@@ -10,3 +10,5 @@ real time chat app, with chatrooms
 - Redis to save messages for quick access
 - Postgres to save message history, messages are written to db from redis as batches of length 100
 - Docker containers
+
+![Alt Text](./images/main-page.png)

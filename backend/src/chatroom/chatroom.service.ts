@@ -82,12 +82,18 @@ export class ChatroomService {
       throw new BadRequestException(`Chatroom ${name} already exists`);
     }
 
-    return this.chatroomRepository.save({
+    const newChatroom: ChatroomEntity = await this.chatroomRepository.save({
       name,
       description: null,
       creator_id: userId,
-      users: [{ id: userId }],
+      users: [],
     });
+
+    const existingUser = await this.getExistingUser(userId);
+    existingUser.chatrooms.push(newChatroom);
+    await this.userRepository.save(existingUser);
+    this.cacheManager.set(userId, existingUser);
+    return newChatroom;
   }
 
   async removeUserFromChatroom(userId, roomId): Promise<ChatroomEntity> {
